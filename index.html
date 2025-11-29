@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Monitor System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .login-section {
+            padding: 40px;
+            text-align: center;
+            background: #f8f9fa;
+        }
+
+        .admin-section, .user-section, .student-section {
+            display: none;
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .action-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .students-table, .tasks-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .students-table th,
+        .students-table td,
+        .tasks-table th,
+        .tasks-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .students-table th,
+        .tasks-table th {
+            background: #34495e;
+            color: white;
+            font-weight: bold;
+        }
+
+        .students-table tr:hover,
+        .tasks-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status.excellent { background: #27ae60; color: white; }
+        .status.good { background: #3498db; color: white; }
+        .status.average { background: #f39c12; color: white; }
+        .status.poor { background: #e74c3c; color: white; }
+
+        .task-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .task-status.pending { background: #f39c12; color: white; }
+        .task-status.completed { background: #27ae60; color: white; }
+        .task-status.approved { background: #3498db; color: white; }
+        .task-status.rejected { background: #e74c3c; color: white; }
+
+        .flash {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .flash.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .user-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .login-info {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #27ae60;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+
+        .deducted { border-left-color: #e74c3c; }
+        .added { border-left-color: #27ae60; }
+
+        .task-item {
+            background: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #f39c12;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .task-item.completed { border-left-color: #27ae60; }
+        .task-item.approved { border-left-color: #3498db; }
+
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .students-table,
+            .tasks-table {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 Class Monitor System</h1>
+            <p>Monitor and manage student marks efficiently</p>
+        </header>
+
+        <!-- Login Section -->
+        <section id="loginSection" class="login-section">
+            <h2>Login</h2>
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Enter username" style="max-width: 300px; margin: 0 auto;">
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Enter password" style="max-width: 300px; margin: 0 auto;">
+            </div>
+            <button class="btn" onclick="login()">Login</button>
+            <div id="loginMessage" style="margin-top: 15px;"></div>
+        </section>
+
+        <!-- Admin Dashboard Section -->
+        <section id="adminSection" class="admin-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>👑 Admin Dashboard</h2>
+                <button class="btn btn-danger" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="user-info">
+                <strong>Welcome, Admin!</strong> - You have full access to manage students and marks.
+            </div>
+
+            <div id="flashMessage"></div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="showAddStudent()">➕ Add Student</button>
+                <button class="btn" onclick="showDeductMarks()">➖ Deduct Marks</button>
+                <button class="btn btn-success" onclick="showAddMarks()">➕ Add Marks</button>
+                <button class="btn btn-warning" onclick="showAssignTask()">📝 Assign Task</button>
+                <button class="btn btn-info" onclick="showPendingTasks()">⏳ Pending Tasks</button>
+                <button class="btn" onclick="showStudentLogins()">🔑 Student Logins</button>
+            </div>
+
+            <!-- Add Student Form -->
+            <div id="addStudentForm" class="action-box" style="display: none;">
+                <h3>Add New Student</h3>
+                <div class="form-group">
+                    <input type="text" id="newStudentName" placeholder="Enter student full name (e.g., Pawan Sahu)">
+                </div>
+                <button class="btn" onclick="addStudent()">Add Student</button>
+                <button class="btn btn-danger" onclick="hideAllForms()">Cancel</button>
+            </div>
+
+            <!-- Student Login Info -->
+            <div id="studentLoginInfo" class="action-box" style="display: none;">
+                <h3>Student Login Created Successfully! ✅</h3>
+                <div class="login-info">
+                    <p><strong>Student Name:</strong> <span id="createdStudentName"></span></p>
+                    <p><strong>Username:</strong> <span id="createdUsername"></span></p>
+                    <p><strong>Password:</strong> <span id="createdPassword"></span></p>
+                </div>
+                <p><em>Please note these credentials. They will not be shown again.</em></p>
+                <button class="btn" onclick="hideStudentLoginInfo()">Close</button>
+            </div>
+
+            <!-- All Student Logins -->
+            <div id="allStudentLogins" class="action-box" style="display: none;">
+                <h3>🔑 All Student Login Details</h3>
+                <div id="studentLoginsContent"></div>
+                <button class="btn btn-danger" onclick="hideAllForms()">Close</button>
+            </div>
+
+            <!-- Deduct Marks Form -->
+            <div id="deductMarksForm" class="action-box" style="display: none;">
+                <h3>Deduct Marks</h3>
+                <div class="form-group">
+                    <select id="deductStudent">
+                        <option value="">Select Student</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="deductMarks" placeholder="Marks to deduct" min="1">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="deductReason" placeholder="Reason for deduction">
+                </div>
+                <button class="btn" onclick="deductMarks()">Deduct Marks</button>
+                <button class="btn btn-danger" onclick="hideAllForms()">Cancel</button>
+            </div>
+
+            <!-- Add Marks Form -->
+            <div id="addMarksForm" class="action-box" style="display: none;">
+                <h3>Add Marks</h3>
+                <div class="form-group">
+                    <select id="addStudent">
+                        <option value="">Select Student</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="addMarks" placeholder="Marks to add" min="1">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="addReason" placeholder="Reason for adding marks">
+                </div>
+                <button class="btn btn-success" onclick="addMarks()">Add Marks</button>
+                <button class="btn btn-danger" onclick="hideAllForms()">Cancel</button>
+            </div>
+
+            <!-- Assign Task Form -->
+            <div id="assignTaskForm" class="action-box" style="display: none;">
+                <h3>Assign New Task</h3>
+                <div class="form-group">
+                    <select id="taskStudent">
+                        <option value="">Select Student</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="taskTitle" placeholder="Task Title">
+                </div>
+                <div class="form-group">
+                    <textarea id="taskDescription" placeholder="Task Description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="taskMarks" placeholder="Marks for completion" min="1">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="taskDeadline" placeholder="Deadline (e.g., 2 days)">
+                </div>
+                <button class="btn btn-warning" onclick="assignTask()">Assign Task</button>
+                <button class="btn btn-danger" onclick="hideAllForms()">Cancel</button>
+            </div>
+
+            <!-- Pending Tasks Section -->
+            <div id="pendingTasksSection" class="action-box" style="display: none;">
+                <h3>⏳ Pending Task Approvals</h3>
+                <div id="pendingTasksContent"></div>
+                <button class="btn btn-danger" onclick="hideAllForms()">Close</button>
+            </div>
+
+            <!-- Students List -->
+            <div id="studentsList">
+                <h3>📋 Students List</h3>
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Username</th>
+                            <th>Current Marks</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <!-- Students will be added here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- All Tasks List -->
+            <div id="allTasksSection">
+                <h3>📝 All Assigned Tasks</h3>
+                <div id="allTasksContent"></div>
+            </div>
+        </section>
+
+        <!-- Student Dashboard Section -->
+        <section id="studentSection" class="student-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>🎓 Student Dashboard</h2>
+                <button class="btn btn-danger" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="user-info">
+                <strong>Welcome, <span id="studentWelcomeName"></span>!</strong> - Complete tasks to earn marks.
+            </div>
+
+            <div id="studentFlashMessage"></div>
+
+            <!-- Student Info -->
+            <div class="action-box">
+                <h3>My Information</h3>
+                <p><strong>Current Marks:</strong> <span id="studentCurrentMarks">0</span></p>
+                <p><strong>Status:</strong> <span id="studentStatus">-</span></p>
+                <p><strong>Pending Tasks:</strong> <span id="studentPendingTasks">0</span></p>
+            </div>
+
+            <!-- My Tasks -->
+            <div id="studentTasksSection">
+                <h3>📝 My Tasks</h3>
+                <div id="studentTasksContent"></div>
+            </div>
+
+            <!-- Task Completion Form -->
+            <div id="completeTaskForm" class="action-box" style="display: none;">
+                <h3>Complete Task</h3>
+                <div class="form-group">
+                    <label>Task:</label>
+                    <p id="completeTaskTitle" style="font-weight: bold;"></p>
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <p id="completeTaskDesc"></p>
+                </div>
+                <div class="form-group">
+                    <label>Proof of Completion:</label>
+                    <textarea id="taskProof" placeholder="Describe how you completed the task or provide proof..." rows="4"></textarea>
+                </div>
+                <button class="btn btn-success" onclick="submitTaskCompletion()">Submit for Approval</button>
+                <button class="btn btn-danger" onclick="hideStudentForms()">Cancel</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // User credentials (hidden from website)
+        let USERS = JSON.parse(localStorage.getItem('classUsers')) || {
+            // Admin accounts
+            'admin': { password: 'admin123', role: 'admin' },
+            'monitor': { password: 'monitor123', role: 'admin' },
+            
+            // Default student accounts (you can remove these if you want)
+            'rahulsharma': { password: '@rahul', role: 'student', studentName: 'Rahul Sharma' },
+            'priyapatel': { password: '@priya', role: 'student', studentName: 'Priya Patel' }
+        };
+
+        // Students data stored in localStorage
+        let students = JSON.parse(localStorage.getItem('classStudents')) || {};
+        let tasks = JSON.parse(localStorage.getItem('classTasks')) || [];
+
+        // Function to generate username from full name
+        function generateUsername(fullName) {
+            // Convert to lowercase and remove spaces
+            return fullName.toLowerCase().replace(/\s+/g, '');
+        }
+
+        // Function to generate password from first name
+        function generatePassword(fullName) {
+            // Get first name and add @ symbol
+            const firstName = fullName.split(' ')[0].toLowerCase();
+            return `@${firstName}`;
+        }
+
+        // Initialize default students if not exists
+        function initializeDefaultStudents() {
+            const defaultStudents = [
+                { name: 'Rahul Sharma', username: 'rahulsharma', password: '@rahul' },
+                { name: 'Priya Patel', username: 'priyapatel', password: '@priya' }
+            ];
+            
+            defaultStudents.forEach(student => {
+                if (!students[student.name]) {
+                    students[student.name] = {
+                        marks: 100,
+                        username: student.username,
+                        history: [{
+                            type: 'added',
+                            marks: 100,
+                            reason: 'Initial marks',
+                            date: new Date().toLocaleString()
+                        }]
+                    };
+                    
+                    // Add to USERS if not exists
+                    if (!USERS[student.username]) {
+                        USERS[student.username] = {
+                            password: student.password,
+                            role: 'student',
+                            studentName: student.name
+                        };
+                    }
+                }
+            });
+            saveStudents();
+            saveUsers();
+        }
+
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('loginMessage');
+
+            if (USERS[username] && USERS[username].password === password) {
+                const userRole = USERS[username].role;
+                
+                document.getElementById('loginSection').style.display = 'none';
+                
+                if (userRole === 'admin') {
+                    document.getElementById('adminSection').style.display = 'block';
+                    initializeDefaultStudents();
+                    loadStudents();
+                    loadAllTasks();
+                } else if (userRole === 'student') {
+                    document.getElementById('studentSection').style.display = 'block';
+                    const studentName = USERS[username].studentName;
+                    document.getElementById('studentWelcomeName').textContent = studentName;
+                    loadStudentDashboard(studentName);
+                }
+                
+                showFlash('Login successful!', 'success');
+            } else {
+                messageDiv.innerHTML = '<div class="flash error">Invalid username or password!</div>';
+            }
+        }
+
+        // Logout function
+        function logout() {
+            document.getElementById('adminSection').style.display = 'none';
+            document.getElementById('studentSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            hideAllForms();
+            hideStudentForms();
+        }
+
+        // Load students for admin
+        function loadStudents() {
+            const deductSelect = document.getElementById('deductStudent');
+            const addSelect = document.getElementById('addStudent');
+            const taskSelect = document.getElementById('taskStudent');
+            const tableBody = document.getElementById('studentsTableBody');
+
+            // Clear existing options
+            deductSelect.innerHTML = '<option value="">Select Student</option>';
+            addSelect.innerHTML = '<option value="">Select Student</option>';
+            taskSelect.innerHTML = '<option value="">Select Student</option>';
+            tableBody.innerHTML = '';
+
+            // Add students to dropdowns and table
+            for (const [name, data] of Object.entries(students)) {
+                // Add to dropdowns
+                const option = `<option value="${name}">${name} (${data.marks} marks)</option>`;
+                deductSelect.innerHTML += option;
+                addSelect.innerHTML += option;
+                taskSelect.innerHTML += option;
+
+                // Add to table
+                const status = getStatus(data.marks);
+                const row = `
+                    <tr>
+                        <td>${name}</td>
+                        <td>${data.username}</td>
+                        <td>${data.marks}</td>
+                        <td><span class="status ${status.class}">${status.text}</span></td>
+                        <td>
+                            <button class="btn btn-info" onclick="viewHistory('${name}')">📊 History</button>
+                            <button class="btn btn-danger" onclick="deleteStudent('${name}')">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            }
+
+            // If no students, show message
+            if (Object.keys(students).length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No students added yet.</td></tr>';
+            }
+        }
+
+        // Show all student logins
+        function showStudentLogins() {
+            hideAllForms();
+            document.getElementById('allStudentLogins').style.display = 'block';
+            
+            let loginsHTML = '';
+            for (const [name, data] of Object.entries(students)) {
+                const username = data.username;
+                const password = USERS[username] ? USERS[username].password : 'N/A';
+                
+                loginsHTML += `
+                    <div class="login-info">
+                        <p><strong>Student:</strong> ${name}</p>
+                        <p><strong>Username:</strong> ${username}</p>
+                        <p><strong>Password:</strong> ${password}</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('studentLoginsContent').innerHTML = loginsHTML || '<p>No students found.</p>';
+        }
+
+        // Load student dashboard
+        function loadStudentDashboard(studentName) {
+            const student = students[studentName];
+            if (!student) return;
+
+            // Update student info
+            document.getElementById('studentCurrentMarks').textContent = student.marks;
+            const status = getStatus(student.marks);
+            document.getElementById('studentStatus').innerHTML = `<span class="status ${status.class}">${status.text}</span>`;
+
+            // Load student tasks
+            loadStudentTasks(studentName);
+        }
+
+        // Load tasks for student
+        function loadStudentTasks(studentName) {
+            const tasksContent = document.getElementById('studentTasksContent');
+            tasksContent.innerHTML = '';
+
+            const studentTasks = tasks.filter(task => task.assignedTo === studentName);
+            const pendingTasks = studentTasks.filter(task => task.status === 'assigned' || task.status === 'submitted');
+
+            document.getElementById('studentPendingTasks').textContent = pendingTasks.length;
+
+            if (studentTasks.length === 0) {
+                tasksContent.innerHTML = '<p>No tasks assigned yet.</p>';
+                return;
+            }
+
+            studentTasks.forEach((task, index) => {
+                const taskItem = document.createElement('div');
+                taskItem.className = `task-item ${task.status}`;
+                
+                let actionButton = '';
+                if (task.status === 'assigned') {
+                    actionButton = `<button class="btn btn-success" onclick="showCompleteTaskForm(${index})">Complete Task</button>`;
+                } else if (task.status === 'submitted') {
+                    actionButton = `<span class="task-status pending">Waiting for Approval</span>`;
+                } else if (task.status === 'approved') {
+                    actionButton = `<span class="task-status completed">✓ Approved</span>`;
+                } else if (task.status === 'rejected') {
+                    actionButton = `<span class="task-status rejected">✗ Rejected</span>`;
+                }
+
+                taskItem.innerHTML = `
+                    <h4>${task.title}</h4>
+                    <p><strong>Description:</strong> ${task.description}</p>
+                    <p><strong>Marks:</strong> ${task.marks} | <strong>Deadline:</strong> ${task.deadline}</p>
+                    <p><strong>Status:</strong> <span class="task-status ${task.status}">${task.status}</span></p>
+                    ${task.proof ? `<p><strong>Your Submission:</strong> ${task.proof}</p>` : ''}
+                    ${task.feedback ? `<p><strong>Teacher Feedback:</strong> ${task.feedback}</p>` : ''}
+                    <div style="margin-top: 10px;">
+                        ${actionButton}
+                    </div>
+                `;
+                tasksContent.appendChild(taskItem);
+            });
+        }
+
+        // Show complete task form
+        function showCompleteTaskForm(taskIndex) {
+            const task = tasks[taskIndex];
+            document.getElementById('completeTaskTitle').textContent = task.title;
+            document.getElementById('completeTaskDesc').textContent = task.description;
+            document.getElementById('taskProof').value = '';
+            document.getElementById('completeTaskForm').style.display = 'block';
+            window.currentTaskIndex = taskIndex;
+        }
+
+        // Submit task completion
+        function submitTaskCompletion() {
+            const taskIndex = window.currentTaskIndex;
+            const proof = document.getElementById('taskProof').value.trim();
+
+            if (!proof) {
+                showStudentFlash('Please provide proof of completion!', 'error');
+                return;
+            }
+
+            tasks[taskIndex].status = 'submitted';
+            tasks[taskIndex].proof = proof;
+            tasks[taskIndex].submittedAt = new Date().toLocaleString();
+
+            saveTasks();
+            hideStudentForms();
+            loadStudentTasks(tasks[taskIndex].assignedTo);
+            showStudentFlash('Task submitted for approval!', 'success');
+        }
+
+        // Load all tasks for admin
+        function loadAllTasks() {
+            const tasksContent = document.getElementById('allTasksContent');
+            tasksContent.innerHTML = '';
+
+            if (tasks.length === 0) {
+                tasksContent.innerHTML = '<p>No tasks assigned yet.</p>';
+                return;
+            }
+
+            tasks.forEach((task, index) => {
+                const taskItem = document.createElement('div');
+                taskItem.className = `task-item ${task.status}`;
+                
+                let actionButtons = '';
+                if (task.status === 'submitted') {
+                    actionButtons = `
+                        <button class="btn btn-success" onclick="approveTask(${index})">Approve</button>
+                        <button class="btn btn-danger" onclick="rejectTask(${index})">Reject</button>
+                    `;
+                }
+
+                taskItem.innerHTML = `
+                    <h4>${task.title}</h4>
+                    <p><strong>Assigned to:</strong> ${task.assignedTo}</p>
+                    <p><strong>Description:</strong> ${task.description}</p>
+                    <p><strong>Marks:</strong> ${task.marks} | <strong>Deadline:</strong> ${task.deadline}</p>
+                    <p><strong>Status:</strong> <span class="task-status ${task.status}">${task.status}</span></p>
+                    ${task.proof ? `<p><strong>Student's Submission:</strong> ${task.proof}</p>` : ''}
+                    ${task.submittedAt ? `<p><strong>Submitted on:</strong> ${task.submittedAt}</p>` : ''}
+                    <div style="margin-top: 10px;">
+                        ${actionButtons}
+                        <button class="btn btn-danger" onclick="deleteTask(${index})">Delete Task</button>
+                    </div>
+                `;
+                tasksContent.appendChild(taskItem);
+            });
+        }
+
+        // Show pending tasks for approval
+        function showPendingTasks() {
+            hideAllForms();
+            document.getElementById('pendingTasksSection').style.display = 'block';
+            
+            const pendingTasks = tasks.filter(task => task.status === 'submitted');
+            const content = document.getElementById('pendingTasksContent');
+            content.innerHTML = '';
+
+            if (pendingTasks.length === 0) {
+                content.innerHTML = '<p>No pending tasks for approval.</p>';
+                return;
+            }
+
+            pendingTasks.forEach((task, index) => {
+                const originalIndex = tasks.findIndex(t => t === task);
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item submitted';
+                taskItem.innerHTML = `
+                    <h4>${task.title}</h4>
+                    <p><strong>Student:</strong> ${task.assignedTo}</p>
+                    <p><strong>Submission:</strong> ${task.proof}</p>
+                    <p><strong>Marks to award:</strong> ${task.marks}</p>
+                    <div style="margin-top: 10px;">
+                        <button class="btn btn-success" onclick="approveTask(${originalIndex})">Approve (+${task.marks} marks)</button>
+                        <button class="btn btn-danger" onclick="rejectTask(${originalIndex})">Reject</button>
+                    </div>
+                `;
+                content.appendChild(taskItem);
+            });
+        }
+
+        // Approve task
+        function approveTask(taskIndex) {
+            const task = tasks[taskIndex];
+            const studentName = task.assignedTo;
+            
+            // Add marks to student
+            students[studentName].marks += task.marks;
+            students[studentName].history.push({
+                type: 'added',
+                marks: task.marks,
+                reason: `Task completed: ${task.title}`,
+                date: new Date().toLocaleString()
+            });
+
+            // Update task status
+            task.status = 'approved';
+            task.approvedAt = new Date().toLocaleString();
+
+            saveStudents();
+            saveTasks();
+            loadStudents();
+            loadAllTasks();
+            showPendingTasks();
+            showFlash(`Task approved! ${task.marks} marks added to ${studentName}.`, 'success');
+        }
+
+        // Reject task
+        function rejectTask(taskIndex) {
+            const task = tasks[taskIndex];
+            const reason = prompt('Enter reason for rejection:');
+            
+            if (reason) {
+                task.status = 'rejected';
+                task.feedback = reason;
+                task.rejectedAt = new Date().toLocaleString();
+
+                saveTasks();
+                loadAllTasks();
+                showPendingTasks();
+                showFlash(`Task rejected. Feedback sent to student.`, 'success');
+            }
+        }
+
+        // Assign new task
+        function assignTask() {
+            const studentName = document.getElementById('taskStudent').value;
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            const marks = parseInt(document.getElementById('taskMarks').value);
+            const deadline = document.getElementById('taskDeadline').value.trim();
+
+            if (!studentName || !title || !description || !marks || !deadline) {
+                showFlash('Please fill all fields!', 'error');
+                return;
+            }
+
+            const newTask = {
+                id: Date.now(),
+                title: title,
+                description: description,
+                marks: marks,
+                deadline: deadline,
+                assignedTo: studentName,
+                status: 'assigned',
+                assignedAt: new Date().toLocaleString()
+            };
+
+            tasks.push(newTask);
+            saveTasks();
+            loadAllTasks();
+            hideAllForms();
+            showFlash(`Task "${title}" assigned to ${studentName} for ${marks} marks!`, 'success');
+        }
+
+        // Delete task
+        function deleteTask(taskIndex) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                tasks.splice(taskIndex, 1);
+                saveTasks();
+                loadAllTasks();
+                showFlash('Task deleted successfully!', 'success');
+            }
+        }
+
+        // Add new student
+        function addStudent() {
+            const name = document.getElementById('newStudentName').value.trim();
+            
+            if (!name) {
+                showFlash('Please enter student name!', 'error');
+                return;
+            }
+
+            if (students[name]) {
+                showFlash('Student already exists!', 'error');
+                return;
+            }
+
+            // Generate username and password
+            const username = generateUsername(name);
+            const password = generatePassword(name);
+
+            // Add to students
+            students[name] = {
+                marks: 100,
+                username: username,
+                history: [{
+                    type: 'added',
+                    marks: 100,
+                    reason: 'Initial marks',
+                    date: new Date().toLocaleString()
+                }]
+            };
+
+            // Add to USERS for login
+            USERS[username] = {
+                password: password,
+                role: 'student',
+                studentName: name
+            };
+
+            saveStudents();
+            saveUsers();
+            loadStudents();
+            hideAllForms();
+
+            // Show login credentials
+            document.getElementById('createdStudentName').textContent = name;
+            document.getElementById('createdUsername').textContent = username;
+            document.getElementById('createdPassword').textContent = password;
+            document.getElementById('studentLoginInfo').style.display = 'block';
+            
+            showFlash(`Student ${name} added successfully!`, 'success');
+        }
+
+        // Hide student login info
+        function hideStudentLoginInfo() {
+            document.getElementById('studentLoginInfo').style.display = 'none';
+        }
+
+        // Deduct marks
+        function deductMarks() {
+            const name = document.getElementById('deductStudent').value;
+            const marks = parseInt(document.getElementById('deductMarks').value);
+            const reason = document.getElementById('deductReason').value.trim();
+
+            if (!name || !marks || !reason) {
+                showFlash('Please fill all fields!', 'error');
+                return;
+            }
+
+            if (!students[name]) {
+                showFlash('Student not found!', 'error');
+                return;
+            }
+
+            students[name].marks -= marks;
+            students[name].history.push({
+                type: 'deducted',
+                marks: marks,
+                reason: reason,
+                date: new Date().toLocaleString()
+            });
+
+            saveStudents();
+            loadStudents();
+            hideAllForms();
+            showFlash(`Deducted ${marks} marks from ${name}. Reason: ${reason}`, 'success');
+        }
+
+        // Add marks
+        function addMarks() {
+            const name = document.getElementById('addStudent').value;
+            const marks = parseInt(document.getElementById('addMarks').value);
+            const reason = document.getElementById('addReason').value.trim();
+
+            if (!name || !marks || !reason) {
+                showFlash('Please fill all fields!', 'error');
+                return;
+            }
+
+            if (!students[name]) {
+                showFlash('Student not found!', 'error');
+                return;
+            }
+
+            students[name].marks += marks;
+            students[name].history.push({
+                type: 'added',
+                marks: marks,
+                reason: reason,
+                date: new Date().toLocaleString()
+            });
+
+            saveStudents();
+            loadStudents();
+            hideAllForms();
+            showFlash(`Added ${marks} marks to ${name}. Reason: ${reason}`, 'success');
+        }
+
+        // View student history (admin)
+        function viewHistory(studentName) {
+            const student = students[studentName];
+            let historyHTML = '<h4>History for ' + studentName + '</h4>';
+            
+            if (student.history.length === 0) {
+                historyHTML += '<p>No history available.</p>';
+            } else {
+                student.history.forEach(record => {
+                    const typeClass = record.type === 'added' ? 'added' : 'deducted';
+                    const typeColor = record.type === 'added' ? 'green' : 'red';
+                    historyHTML += `
+                        <div class="history-item ${typeClass}">
+                            <strong style="color: ${typeColor}">${record.type.toUpperCase()}</strong><br>
+                            Marks: ${record.marks}<br>
+                            Reason: ${record.reason}<br>
+                            Date: ${record.date}
+                        </div>
+                    `;
+                });
+            }
+            
+            alert(historyHTML);
+        }
+
+        // Delete student
+        function deleteStudent(studentName) {
+            if (confirm(`Are you sure you want to delete ${studentName}? This will also remove their login.`)) {
+                const student = students[studentName];
+                
+                // Remove from USERS
+                if (student && student.username) {
+                    delete USERS[student.username];
+                    saveUsers();
+                }
+                
+                // Remove from students
+                delete students[studentName];
+                saveStudents();
+                loadStudents();
+                showFlash(`Student ${studentName} deleted successfully!`, 'success');
+            }
+        }
+
+        // Get status based on marks
+        function getStatus(marks) {
+            if (marks >= 80) return { class: 'excellent', text: 'Excellent' };
+            if (marks >= 60) return { class: 'good', text: 'Good' };
+            if (marks >= 40) return { class: 'average', text: 'Average' };
+            return { class: 'poor', text: 'Poor' };
+        }
+
+        // Show flash messages for admin
+        function showFlash(message, type) {
+            const flashDiv = document.getElementById('flashMessage');
+            flashDiv.innerHTML = `<div class="flash ${type}">${message}</div>`;
+            setTimeout(() => {
+                flashDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        // Show flash messages for student
+        function showStudentFlash(message, type) {
+            const flashDiv = document.getElementById('studentFlashMessage');
+            flashDiv.innerHTML = `<div class="flash ${type}">${message}</div>`;
+            setTimeout(() => {
+                flashDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        // Form display functions for admin
+        function showAddStudent() {
+            hideAllForms();
+            document.getElementById('addStudentForm').style.display = 'block';
+        }
+
+        function showDeductMarks() {
+            hideAllForms();
+            document.getElementById('deductMarksForm').style.display = 'block';
+        }
+
+        function showAddMarks() {
+            hideAllForms();
+            document.getElementById('addMarksForm').style.display = 'block';
+        }
+
+        function showAssignTask() {
+            hideAllForms();
+            document.getElementById('assignTaskForm').style.display = 'block';
+        }
+
+        function hideAllForms() {
+            document.getElementById('addStudentForm').style.display = 'none';
+            document.getElementById('deductMarksForm').style.display = 'none';
+            document.getElementById('addMarksForm').style.display = 'none';
+            document.getElementById('assignTaskForm').style.display = 'none';
+            document.getElementById('pendingTasksSection').style.display = 'none';
+            document.getElementById('allStudentLogins').style.display = 'none';
+            document.getElementById('studentLoginInfo').style.display = 'none';
+            
+            // Clear form fields
+            document.getElementById('newStudentName').value = '';
+            document.getElementById('deductMarks').value = '';
+            document.getElementById('deductReason').value = '';
+            document.getElementById('addMarks').value = '';
+            document.getElementById('addReason').value = '';
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('taskMarks').value = '';
+            document.getElementById('taskDeadline').value = '';
+        }
+
+        // Form functions for student
+        function hideStudentForms() {
+            document.getElementById('completeTaskForm').style.display = 'none';
+        }
+
+        // Save students to localStorage
+        function saveStudents() {
+            localStorage.setItem('classStudents', JSON.stringify(students));
+        }
+
+        // Save users to localStorage
+        function saveUsers() {
+            localStorage.setItem('classUsers', JSON.stringify(USERS));
+        }
+
+        // Save tasks to localStorage
+        function saveTasks() {
+            localStorage.setItem('classTasks', JSON.stringify(tasks));
+        }
+
+        // Load tasks from localStorage
+        function loadTasks() {
+            const savedTasks = localStorage.getItem('classTasks');
+            if (savedTasks) {
+                tasks = JSON.parse(savedTasks);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTasks();
+            
+            // Load USERS from localStorage
+            const savedUsers = localStorage.getItem('classUsers');
+            if (savedUsers) {
+                USERS = JSON.parse(savedUsers);
+            }
+        });
+    </script>
+</body>
+</html>
