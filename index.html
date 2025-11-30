@@ -457,13 +457,13 @@
     </div>
 
     <script>
-        // User credentials (hidden from website)
+        // User credentials
         let USERS = JSON.parse(localStorage.getItem('classUsers')) || {
             // Admin accounts
             'admin': { password: 'admin123', role: 'admin' },
             'monitor': { password: 'monitor123', role: 'admin' },
             
-            // Default student accounts (you can remove these if you want)
+            // Default student accounts
             'rahulsharma': { password: '@rahul', role: 'student', studentName: 'Rahul Sharma' },
             'priyapatel': { password: '@priya', role: 'student', studentName: 'Priya Patel' }
         };
@@ -474,13 +474,11 @@
 
         // Function to generate username from full name
         function generateUsername(fullName) {
-            // Convert to lowercase and remove spaces
             return fullName.toLowerCase().replace(/\s+/g, '');
         }
 
         // Function to generate password from first name
         function generatePassword(fullName) {
-            // Get first name and add @ symbol
             const firstName = fullName.split(' ')[0].toLowerCase();
             return `@${firstName}`;
         }
@@ -491,6 +489,8 @@
                 { name: 'Rahul Sharma', username: 'rahulsharma', password: '@rahul' },
                 { name: 'Priya Patel', username: 'priyapatel', password: '@priya' }
             ];
+            
+            let needsSave = false;
             
             defaultStudents.forEach(student => {
                 if (!students[student.name]) {
@@ -504,27 +504,35 @@
                             date: new Date().toLocaleString()
                         }]
                     };
-                    
-                    // Add to USERS if not exists
-                    if (!USERS[student.username]) {
-                        USERS[student.username] = {
-                            password: student.password,
-                            role: 'student',
-                            studentName: student.name
-                        };
-                    }
+                    needsSave = true;
+                }
+                
+                // Add to USERS if not exists
+                if (!USERS[student.username]) {
+                    USERS[student.username] = {
+                        password: student.password,
+                        role: 'student',
+                        studentName: student.name
+                    };
+                    needsSave = true;
                 }
             });
-            saveStudents();
-            saveUsers();
+            
+            if (needsSave) {
+                saveStudents();
+                saveUsers();
+            }
         }
 
-        // Login function
+        // Login function - FIXED VERSION
         function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const messageDiv = document.getElementById('loginMessage');
 
+            // Ensure default data is initialized
+            initializeDefaultStudents();
+            
             if (USERS[username] && USERS[username].password === password) {
                 const userRole = USERS[username].role;
                 
@@ -532,17 +540,16 @@
                 
                 if (userRole === 'admin') {
                     document.getElementById('adminSection').style.display = 'block';
-                    initializeDefaultStudents();
                     loadStudents();
                     loadAllTasks();
+                    showFlash('Admin login successful!', 'success');
                 } else if (userRole === 'student') {
                     document.getElementById('studentSection').style.display = 'block';
                     const studentName = USERS[username].studentName;
                     document.getElementById('studentWelcomeName').textContent = studentName;
                     loadStudentDashboard(studentName);
+                    showStudentFlash('Student login successful!', 'success');
                 }
-                
-                showFlash('Login successful!', 'success');
             } else {
                 messageDiv.innerHTML = '<div class="flash error">Invalid username or password!</div>';
             }
@@ -628,7 +635,10 @@
         // Load student dashboard
         function loadStudentDashboard(studentName) {
             const student = students[studentName];
-            if (!student) return;
+            if (!student) {
+                showStudentFlash('Student data not found!', 'error');
+                return;
+            }
 
             // Update student info
             document.getElementById('studentCurrentMarks').textContent = student.marks;
@@ -1134,6 +1144,15 @@
             if (savedUsers) {
                 USERS = JSON.parse(savedUsers);
             }
+            
+            // Load students from localStorage
+            const savedStudents = localStorage.getItem('classStudents');
+            if (savedStudents) {
+                students = JSON.parse(savedStudents);
+            }
+            
+            // Initialize default data
+            initializeDefaultStudents();
         });
     </script>
 </body>
