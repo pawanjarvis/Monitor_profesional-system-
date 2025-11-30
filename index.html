@@ -182,6 +182,23 @@
             margin: 10px 0;
             text-align: center;
         }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+        }
+
+        .sync-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
         
         @media (max-width: 768px) {
             .action-buttons {
@@ -200,6 +217,8 @@
     </style>
 </head>
 <body>
+    <div class="sync-status" id="syncStatus">🔄 Syncing...</div>
+    
     <div class="container">
         <header>
             <h1>🎓 Class Monitor System</h1>
@@ -220,6 +239,7 @@
             
             <div style="margin-top: 20px; background: #e3f2fd; padding: 15px; border-radius: 8px;">
                 <h3>Login Credentials:</h3>
+                <p><strong>Admin:</strong> admin / admin123</p>
                 <p><strong>Students:</strong> best_students_class_8th / I am best</p>
             </div>
         </section>
@@ -354,8 +374,8 @@
             'best_students_class_8th': { password: 'I am best', role: 'publicStudent' }
         };
 
-        // Students data
-        let students = JSON.parse(localStorage.getItem('classStudents')) || {
+        // Default students data
+        const DEFAULT_STUDENTS = {
             'Rahul Sharma': { marks: 95, history: [] },
             'Priya Patel': { marks: 88, history: [] },
             'Amit Kumar': { marks: 76, history: [] },
@@ -366,22 +386,131 @@
             'Pooja Mishra': { marks: 96, history: [] }
         };
 
+        // Firebase configuration - APNE FIREBASE PROJECT KE LIYE
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4eYZWz8Qq5J5H6q5Z5Z5Z5Z5Z5Z5Z5Z5Z",
+            authDomain: "monitor-professional-system.firebaseapp.com",
+            databaseURL: "https://monitor-professional-system-default-rtdb.firebaseio.com",
+            projectId: "monitor-professional-system",
+            storageBucket: "monitor-professional-system.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global students variable
+        let students = {};
+
+        // Update sync status
+        function updateSyncStatus(status) {
+            const statusDiv = document.getElementById('syncStatus');
+            if (status === 'connected') {
+                statusDiv.innerHTML = '✅ Synced';
+                statusDiv.style.background = '#27ae60';
+            } else if (status === 'syncing') {
+                statusDiv.innerHTML = '🔄 Syncing...';
+                statusDiv.style.background = '#f39c12';
+            } else {
+                statusDiv.innerHTML = '❌ Offline';
+                statusDiv.style.background = '#e74c3c';
+            }
+        }
+
+        // Load students from Firebase
+        function loadStudentsFromFirebase() {
+            updateSyncStatus('syncing');
+            return database.ref('students').once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        students = data;
+                    } else {
+                        // Initialize with default data
+                        students = DEFAULT_STUDENTS;
+                        saveStudentsToFirebase();
+                    }
+                    updateSyncStatus('connected');
+                    return students;
+                })
+                .catch((error) => {
+                    console.error('Error loading data:', error);
+                    updateSyncStatus('error');
+                    // Fallback to localStorage if Firebase fails
+                    const localData = localStorage.getItem('classStudents');
+                    if (localData) {
+                        students = JSON.parse(localData);
+                    } else {
+                        students = DEFAULT_STUDENTS;
+                    }
+                    return students;
+                });
+        }
+
+        // Save students to Firebase
+        function saveStudentsToFirebase() {
+            updateSyncStatus('syncing');
+            return database.ref('students').set(students)
+                .then(() => {
+                    updateSyncStatus('connected');
+                    // Also save to localStorage as backup
+                    localStorage.setItem('classStudents', JSON.stringify(students));
+                    return true;
+                })
+                .catch((error) => {
+                    console.error('Error saving data:', error);
+                    updateSyncStatus('error');
+                    // Fallback to localStorage
+                    localStorage.setItem('classStudents', JSON.stringify(students));
+                    return false;
+                });
+        }
+
+        // Real-time updates
+        function setupRealTimeUpdates() {
+            database.ref('students').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    students = data;
+                    // Update UI based on current view
+                    if (document.getElementById('adminSection').style.display === 'block') {
+                        loadStudents();
+                    } else if (document.getElementById('publicSection').style.display === 'block') {
+                        loadPublicStudents();
+                        loadTopStudents();
+                    }
+                    updateSyncStatus('connected');
+                }
+            });
+        }
+
         // Login function
-        function login() {
+        async function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const messageDiv = document.getElementById('loginMessage');
 
             if (USERS[username] && USERS[username].password === password) {
-                document.getElementById('loginSection').style.display = 'none';
+                messageDiv.innerHTML = '<div style="background:#d4edda;color:#155724;padding:10px;border-radius:5px;">Loading data...</div>';
                 
-                if (USERS[username].role === 'admin') {
-                    document.getElementById('adminSection').style.display = 'block';
-                    loadStudents();
-                } else {
-                    document.getElementById('publicSection').style.display = 'block';
-                    loadPublicStudents();
-                    loadTopStudents();
+                try {
+                    await loadStudentsFromFirebase();
+                    setupRealTimeUpdates();
+                    
+                    document.getElementById('loginSection').style.display = 'none';
+                    
+                    if (USERS[username].role === 'admin') {
+                        document.getElementById('adminSection').style.display = 'block';
+                        loadStudents();
+                    } else {
+                        document.getElementById('publicSection').style.display = 'block';
+                        loadPublicStudents();
+                        loadTopStudents();
+                    }
+                } catch (error) {
+                    messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Error loading data. Please try again.</div>';
                 }
             } else {
                 messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Invalid username or password!</div>';
@@ -499,7 +628,7 @@
         }
 
         // Add new student
-        function addStudent() {
+        async function addStudent() {
             const name = document.getElementById('newStudentName').value.trim();
             
             if (!name) {
@@ -522,20 +651,29 @@
                 }]
             };
 
-            saveStudents();
-            loadStudents();
-            hideAllForms();
-            showFlash(`Student ${name} added successfully!`, 'success');
+            const success = await saveStudentsToFirebase();
+            if (success) {
+                loadStudents();
+                hideAllForms();
+                showFlash(`Student ${name} added successfully!`, 'success');
+            } else {
+                showFlash('Error saving student. Please try again.', 'error');
+            }
         }
 
         // Deduct marks
-        function deductMarks() {
+        async function deductMarks() {
             const name = document.getElementById('deductStudent').value;
             const marks = parseInt(document.getElementById('deductMarks').value);
             const reason = document.getElementById('deductReason').value.trim();
 
             if (!name || !marks || !reason) {
                 showFlash('Please fill all fields!', 'error');
+                return;
+            }
+
+            if (!students[name]) {
+                showFlash('Student not found!', 'error');
                 return;
             }
 
@@ -547,20 +685,29 @@
                 date: new Date().toLocaleString()
             });
 
-            saveStudents();
-            loadStudents();
-            hideAllForms();
-            showFlash(`Deducted ${marks} marks from ${name}. Reason: ${reason}`, 'success');
+            const success = await saveStudentsToFirebase();
+            if (success) {
+                loadStudents();
+                hideAllForms();
+                showFlash(`Deducted ${marks} marks from ${name}. Reason: ${reason}`, 'success');
+            } else {
+                showFlash('Error deducting marks. Please try again.', 'error');
+            }
         }
 
         // Add marks
-        function addMarks() {
+        async function addMarks() {
             const name = document.getElementById('addStudent').value;
             const marks = parseInt(document.getElementById('addMarks').value);
             const reason = document.getElementById('addReason').value.trim();
 
             if (!name || !marks || !reason) {
                 showFlash('Please fill all fields!', 'error');
+                return;
+            }
+
+            if (!students[name]) {
+                showFlash('Student not found!', 'error');
                 return;
             }
 
@@ -572,10 +719,14 @@
                 date: new Date().toLocaleString()
             });
 
-            saveStudents();
-            loadStudents();
-            hideAllForms();
-            showFlash(`Added ${marks} marks to ${name}. Reason: ${reason}`, 'success');
+            const success = await saveStudentsToFirebase();
+            if (success) {
+                loadStudents();
+                hideAllForms();
+                showFlash(`Added ${marks} marks to ${name}. Reason: ${reason}`, 'success');
+            } else {
+                showFlash('Error adding marks. Please try again.', 'error');
+            }
         }
 
         // View student history
@@ -599,12 +750,16 @@
         }
 
         // Delete student
-        function deleteStudent(studentName) {
+        async function deleteStudent(studentName) {
             if (confirm(`Are you sure you want to delete ${studentName}?`)) {
                 delete students[studentName];
-                saveStudents();
-                loadStudents();
-                showFlash(`Student ${studentName} deleted successfully!`, 'success');
+                const success = await saveStudentsToFirebase();
+                if (success) {
+                    loadStudents();
+                    showFlash(`Student ${studentName} deleted successfully!`, 'success');
+                } else {
+                    showFlash('Error deleting student. Please try again.', 'error');
+                }
             }
         }
 
@@ -656,26 +811,16 @@
             document.getElementById('addReason').value = '';
         }
 
-        // Save students to localStorage
-        function saveStudents() {
-            localStorage.setItem('classStudents', JSON.stringify(students));
-        }
-
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Add initial history for default students
-            for (const [name, data] of Object.entries(students)) {
-                if (!data.history || data.history.length === 0) {
-                    data.history = [{
-                        type: 'added',
-                        marks: data.marks,
-                        reason: 'Initial marks',
-                        date: new Date().toLocaleString()
-                    }];
-                }
-            }
-            saveStudents();
+            loadStudentsFromFirebase().then(() => {
+                setupRealTimeUpdates();
+            });
         });
     </script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </body>
 </html>
