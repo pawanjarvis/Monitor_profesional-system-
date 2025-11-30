@@ -217,7 +217,7 @@
     </style>
 </head>
 <body>
-    <div class="sync-status" id="syncStatus">🔄 Syncing...</div>
+    <div class="sync-status" id="syncStatus">📱 Local Storage</div>
     
     <div class="container">
         <header>
@@ -386,21 +386,6 @@
             'Pooja Mishra': { marks: 96, history: [] }
         };
 
-        // Firebase configuration - APNE FIREBASE PROJECT KE LIYE
-        const firebaseConfig = {
-            apiKey: "AIzaSyC4eYZWz8Qq5J5H6q5Z5Z5Z5Z5Z5Z5Z5Z5Z",
-            authDomain: "monitor-professional-system.firebaseapp.com",
-            databaseURL: "https://monitor-professional-system-default-rtdb.firebaseio.com",
-            projectId: "monitor-professional-system",
-            storageBucket: "monitor-professional-system.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
         // Global students variable
         let students = {};
 
@@ -408,82 +393,50 @@
         function updateSyncStatus(status) {
             const statusDiv = document.getElementById('syncStatus');
             if (status === 'connected') {
-                statusDiv.innerHTML = '✅ Synced';
+                statusDiv.innerHTML = '✅ Data Saved';
                 statusDiv.style.background = '#27ae60';
-            } else if (status === 'syncing') {
-                statusDiv.innerHTML = '🔄 Syncing...';
+            } else if (status === 'saving') {
+                statusDiv.innerHTML = '💾 Saving...';
                 statusDiv.style.background = '#f39c12';
             } else {
-                statusDiv.innerHTML = '❌ Offline';
-                statusDiv.style.background = '#e74c3c';
+                statusDiv.innerHTML = '📱 Local Storage';
+                statusDiv.style.background = '#3498db';
             }
         }
 
-        // Load students from Firebase
-        function loadStudentsFromFirebase() {
-            updateSyncStatus('syncing');
-            return database.ref('students').once('value')
-                .then((snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        students = data;
-                    } else {
-                        // Initialize with default data
-                        students = DEFAULT_STUDENTS;
-                        saveStudentsToFirebase();
-                    }
+        // Load students from localStorage
+        function loadStudentsFromStorage() {
+            updateSyncStatus('loading');
+            try {
+                const localData = localStorage.getItem('classStudents');
+                if (localData) {
+                    students = JSON.parse(localData);
                     updateSyncStatus('connected');
-                    return students;
-                })
-                .catch((error) => {
-                    console.error('Error loading data:', error);
-                    updateSyncStatus('error');
-                    // Fallback to localStorage if Firebase fails
-                    const localData = localStorage.getItem('classStudents');
-                    if (localData) {
-                        students = JSON.parse(localData);
-                    } else {
-                        students = DEFAULT_STUDENTS;
-                    }
-                    return students;
-                });
-        }
-
-        // Save students to Firebase
-        function saveStudentsToFirebase() {
-            updateSyncStatus('syncing');
-            return database.ref('students').set(students)
-                .then(() => {
-                    updateSyncStatus('connected');
-                    // Also save to localStorage as backup
-                    localStorage.setItem('classStudents', JSON.stringify(students));
-                    return true;
-                })
-                .catch((error) => {
-                    console.error('Error saving data:', error);
-                    updateSyncStatus('error');
-                    // Fallback to localStorage
-                    localStorage.setItem('classStudents', JSON.stringify(students));
-                    return false;
-                });
-        }
-
-        // Real-time updates
-        function setupRealTimeUpdates() {
-            database.ref('students').on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    students = data;
-                    // Update UI based on current view
-                    if (document.getElementById('adminSection').style.display === 'block') {
-                        loadStudents();
-                    } else if (document.getElementById('publicSection').style.display === 'block') {
-                        loadPublicStudents();
-                        loadTopStudents();
-                    }
-                    updateSyncStatus('connected');
+                } else {
+                    students = DEFAULT_STUDENTS;
+                    saveStudentsToStorage();
                 }
-            });
+                return Promise.resolve(students);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                students = DEFAULT_STUDENTS;
+                updateSyncStatus('error');
+                return Promise.resolve(students);
+            }
+        }
+
+        // Save students to localStorage
+        function saveStudentsToStorage() {
+            updateSyncStatus('saving');
+            try {
+                localStorage.setItem('classStudents', JSON.stringify(students));
+                updateSyncStatus('connected');
+                return Promise.resolve(true);
+            } catch (error) {
+                console.error('Error saving data:', error);
+                updateSyncStatus('error');
+                return Promise.resolve(false);
+            }
         }
 
         // Login function
@@ -492,12 +445,16 @@
             const password = document.getElementById('password').value;
             const messageDiv = document.getElementById('loginMessage');
 
+            if (!username || !password) {
+                messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Please enter both username and password!</div>';
+                return;
+            }
+
             if (USERS[username] && USERS[username].password === password) {
                 messageDiv.innerHTML = '<div style="background:#d4edda;color:#155724;padding:10px;border-radius:5px;">Loading data...</div>';
                 
                 try {
-                    await loadStudentsFromFirebase();
-                    setupRealTimeUpdates();
+                    await loadStudentsFromStorage();
                     
                     document.getElementById('loginSection').style.display = 'none';
                     
@@ -509,6 +466,11 @@
                         loadPublicStudents();
                         loadTopStudents();
                     }
+                    
+                    // Clear login fields
+                    document.getElementById('username').value = '';
+                    document.getElementById('password').value = '';
+                    
                 } catch (error) {
                     messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Error loading data. Please try again.</div>';
                 }
@@ -524,6 +486,7 @@
             document.getElementById('loginSection').style.display = 'block';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
+            document.getElementById('loginMessage').innerHTML = '';
             hideAllForms();
         }
 
@@ -651,7 +614,7 @@
                 }]
             };
 
-            const success = await saveStudentsToFirebase();
+            const success = await saveStudentsToStorage();
             if (success) {
                 loadStudents();
                 hideAllForms();
@@ -672,8 +635,18 @@
                 return;
             }
 
+            if (marks <= 0) {
+                showFlash('Please enter valid marks to deduct!', 'error');
+                return;
+            }
+
             if (!students[name]) {
                 showFlash('Student not found!', 'error');
+                return;
+            }
+
+            if (students[name].marks - marks < 0) {
+                showFlash('Cannot deduct more marks than available!', 'error');
                 return;
             }
 
@@ -685,7 +658,7 @@
                 date: new Date().toLocaleString()
             });
 
-            const success = await saveStudentsToFirebase();
+            const success = await saveStudentsToStorage();
             if (success) {
                 loadStudents();
                 hideAllForms();
@@ -706,6 +679,11 @@
                 return;
             }
 
+            if (marks <= 0) {
+                showFlash('Please enter valid marks to add!', 'error');
+                return;
+            }
+
             if (!students[name]) {
                 showFlash('Student not found!', 'error');
                 return;
@@ -719,7 +697,7 @@
                 date: new Date().toLocaleString()
             });
 
-            const success = await saveStudentsToFirebase();
+            const success = await saveStudentsToStorage();
             if (success) {
                 loadStudents();
                 hideAllForms();
@@ -732,28 +710,95 @@
         // View student history
         function viewHistory(studentName) {
             const student = students[studentName];
-            let historyHTML = '<h3>History for ' + studentName + '</h3>';
+            if (!student || !student.history || student.history.length === 0) {
+                alert(`No history available for ${studentName}`);
+                return;
+            }
+
+            let historyHTML = `
+                <div style="text-align:center;background:#34495e;color:white;padding:10px;border-radius:10px 10px 0 0;">
+                    <h3>History for ${studentName}</h3>
+                </div>
+                <div style="max-height:400px;overflow-y:auto;padding:10px;">
+            `;
             
-            student.history.forEach(record => {
-                const color = record.type === 'added' ? 'green' : 'red';
+            student.history.forEach((record, index) => {
+                const color = record.type === 'added' ? '#27ae60' : '#e74c3c';
+                const icon = record.type === 'added' ? '➕' : '➖';
                 historyHTML += `
-                    <div style="background:#f8f9fa;padding:10px;margin:5px 0;border-radius:5px;border-left:3px solid ${color}">
-                        <strong style="color:${color}">${record.type.toUpperCase()}</strong><br>
-                        Marks: ${record.marks}<br>
-                        Reason: ${record.reason}<br>
-                        Date: ${record.date}
+                    <div style="background:#f8f9fa;padding:12px;margin:8px 0;border-radius:8px;border-left:4px solid ${color}">
+                        <strong>${icon} ${record.type.toUpperCase()}</strong><br>
+                        <strong>Marks:</strong> ${record.marks}<br>
+                        <strong>Reason:</strong> ${record.reason}<br>
+                        <strong>Date:</strong> ${record.date}
                     </div>
                 `;
             });
             
-            alert(historyHTML);
+            historyHTML += '</div>';
+            
+            // Create custom modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                border-radius: 10px;
+                width: 90%;
+                max-width: 500px;
+                max-height: 80vh;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            modalContent.innerHTML = historyHTML;
+            
+            const closeButton = document.createElement('button');
+            closeButton.textContent = 'Close';
+            closeButton.style.cssText = `
+                background: #e74c3c;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                margin: 10px;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            `;
+            closeButton.onclick = function() {
+                document.body.removeChild(modal);
+            };
+            
+            modalContent.appendChild(closeButton);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            };
         }
 
         // Delete student
         async function deleteStudent(studentName) {
-            if (confirm(`Are you sure you want to delete ${studentName}?`)) {
+            if (confirm(`Are you sure you want to delete ${studentName}? This action cannot be undone.`)) {
                 delete students[studentName];
-                const success = await saveStudentsToFirebase();
+                const success = await saveStudentsToStorage();
                 if (success) {
                     loadStudents();
                     showFlash(`Student ${studentName} deleted successfully!`, 'success');
@@ -775,11 +820,12 @@
         function showFlash(message, type) {
             const color = type === 'success' ? '#d4edda' : '#f8d7da';
             const textColor = type === 'success' ? '#155724' : '#721c24';
-            document.getElementById('flashMessage').innerHTML = 
-                `<div style="background:${color};color:${textColor};padding:15px;border-radius:8px;margin:20px 0;">${message}</div>`;
+            const flashDiv = document.getElementById('flashMessage');
+            flashDiv.innerHTML = 
+                `<div style="background:${color};color:${textColor};padding:15px;border-radius:8px;margin:20px 0;border-left:4px solid ${type === 'success' ? '#27ae60' : '#e74c3c'};">${message}</div>`;
             setTimeout(() => {
-                document.getElementById('flashMessage').innerHTML = '';
-            }, 3000);
+                flashDiv.innerHTML = '';
+            }, 4000);
         }
 
         // Form display functions
@@ -813,14 +859,15 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            loadStudentsFromFirebase().then(() => {
-                setupRealTimeUpdates();
+            loadStudentsFromStorage();
+            
+            // Enter key support for login
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    login();
+                }
             });
         });
     </script>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </body>
 </html>
