@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Class Monitor System</title>
+    <title>Class Monitor System - Firebase Sync</title>
     <style>
         * {
             margin: 0;
@@ -84,6 +84,10 @@
         
         .btn-success {
             background: linear-gradient(135deg, #27ae60, #219a52);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
         }
         
         .action-buttons {
@@ -198,6 +202,27 @@
             padding: 5px 10px;
             border-radius: 5px;
             font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .json-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        .json-data {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
         }
         
         @media (max-width: 768px) {
@@ -217,12 +242,12 @@
     </style>
 </head>
 <body>
-    <div class="sync-status" id="syncStatus">📱 Local Storage</div>
+    <div class="sync-status" id="syncStatus">🔄 Loading...</div>
     
     <div class="container">
         <header>
             <h1>🎓 Class Monitor System</h1>
-            <p>Monitor and manage student marks efficiently</p>
+            <p>Firebase Connected - Real-time Sync Across All Devices</p>
         </header>
 
         <!-- Login Section -->
@@ -238,8 +263,16 @@
             <div id="loginMessage" style="margin-top: 15px;"></div>
             
             <div style="margin-top: 20px; background: #e3f2fd; padding: 15px; border-radius: 8px;">
-                <h3>Login Credentials:
-                <p><strong>Students:</strong> best_students_class_8th / I am best</p>
+                <h3>Login Credentials:</h3>
+                <p><strong>Admin:</strong> admin / admin123</p>
+                <p><strong>Students:</strong> student / student123</p>
+                <p><strong>Class View:</strong> class8 / class8123</p>
+            </div>
+
+            <div class="json-section">
+                <h3>📊 Current JSON Data</h3>
+                <button class="btn btn-warning" onclick="loadJSONData()">Refresh JSON Data</button>
+                <div id="jsonData" class="json-data">Loading...</div>
             </div>
         </section>
 
@@ -300,6 +333,7 @@
                 <button class="btn" onclick="showAddStudent()">➕ Add Student</button>
                 <button class="btn" onclick="showDeductMarks()">➖ Deduct Marks</button>
                 <button class="btn btn-success" onclick="showAddMarks()">➕ Add Marks</button>
+                <button class="btn btn-warning" onclick="showJSONManager()">📁 JSON Manager</button>
             </div>
 
             <!-- Add Student Form -->
@@ -307,6 +341,9 @@
                 <h3>Add New Student</h3>
                 <div class="form-group">
                     <input type="text" id="newStudentName" placeholder="Enter student full name">
+                </div>
+                <div class="form-group">
+                    <input type="number" id="newStudentMarks" placeholder="Initial marks (default: 100)" value="100" min="0" max="100">
                 </div>
                 <button class="btn" onclick="addStudent()">Add Student</button>
                 <button class="btn btn-danger" onclick="hideAllForms()">Cancel</button>
@@ -348,6 +385,32 @@
                 <button class="btn btn-danger" onclick="hideAllForms()">Cancel</button>
             </div>
 
+            <!-- JSON Manager -->
+            <div id="jsonManagerForm" class="action-box" style="display: none;">
+                <h3>📁 JSON Data Manager</h3>
+                <p>Export and import student data as JSON for backup or sharing.</p>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="exportJSON()">📤 Export JSON</button>
+                    <button class="btn" onclick="showImportJSON()">📥 Import JSON</button>
+                    <button class="btn btn-danger" onclick="resetToDefault()">🔄 Reset to Default</button>
+                </div>
+                
+                <div id="importJSONSection" style="display: none; margin-top: 20px;">
+                    <div class="form-group">
+                        <textarea id="importJSONData" placeholder="Paste JSON data here" rows="10"></textarea>
+                    </div>
+                    <button class="btn btn-success" onclick="importJSON()">Import Data</button>
+                    <button class="btn btn-danger" onclick="hideImportJSON()">Cancel</button>
+                </div>
+                
+                <div class="json-section" style="margin-top: 20px;">
+                    <h4>Current JSON Data</h4>
+                    <button class="btn btn-warning" onclick="loadJSONData()">Refresh</button>
+                    <div id="adminJSONData" class="json-data">Loading...</div>
+                </div>
+            </div>
+
             <!-- Students List -->
             <div id="adminStudentsList">
                 <h3>📋 Students List</h3>
@@ -370,20 +433,76 @@
         // User credentials
         const USERS = {
             'admin': { password: 'admin123', role: 'admin' },
-            'best_students_class_8th': { password: 'I am best', role: 'publicStudent' }
+            'student': { password: 'student123', role: 'publicStudent' },
+            'class8': { password: 'class8123', role: 'publicStudent' }
         };
 
-        // Default students data
+        // Default students data with proper JSON structure
         const DEFAULT_STUDENTS = {
-            'Rahul Sharma': { marks: 95, history: [] },
-            'Priya Patel': { marks: 88, history: [] },
-            'Amit Kumar': { marks: 76, history: [] },
-            'Sneha Singh': { marks: 92, history: [] },
-            'Rohit Verma': { marks: 81, history: [] },
-            'Neha Gupta': { marks: 89, history: [] },
-            'Vikram Yadav': { marks: 72, history: [] },
-            'Pooja Mishra': { marks: 96, history: [] }
+            "students": {
+                "Rahul Sharma": { 
+                    "marks": 95, 
+                    "history": [
+                        {
+                            "type": "initial",
+                            "marks": 95,
+                            "reason": "Initial marks",
+                            "date": new Date().toLocaleString()
+                        }
+                    ]
+                },
+                "Priya Patel": { 
+                    "marks": 88, 
+                    "history": [
+                        {
+                            "type": "initial",
+                            "marks": 88,
+                            "reason": "Initial marks",
+                            "date": new Date().toLocaleString()
+                        }
+                    ]
+                },
+                "Amit Kumar": { 
+                    "marks": 76, 
+                    "history": [
+                        {
+                            "type": "initial",
+                            "marks": 76,
+                            "reason": "Initial marks",
+                            "date": new Date().toLocaleString()
+                        }
+                    ]
+                },
+                "Sneha Singh": { 
+                    "marks": 92, 
+                    "history": [
+                        {
+                            "type": "initial",
+                            "marks": 92,
+                            "reason": "Initial marks",
+                            "date": new Date().toLocaleString()
+                        }
+                    ]
+                }
+            },
+            "lastUpdated": new Date().toISOString(),
+            "version": "1.0"
         };
+
+        // 🔥 YAHAN APNA FIREBASE CONFIG DALIYE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBThKOtZFQ7JgfPiFAySQwNuJykcsxCMsw",
+            authDomain: "class-monitor-system-8th.firebaseapp.com",
+            databaseURL: "https://class-monitor-system-8th-default-rtdb.firebaseio.com",
+            projectId: "class-monitor-system-8th",
+            storageBucket: "class-monitor-system-8th.firebasestorage.app",
+            messagingSenderId: "706492805118",
+            appId: "1:706492805118:web:066469bd8231f1048c9aaf"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
         // Global students variable
         let students = {};
@@ -392,49 +511,203 @@
         function updateSyncStatus(status) {
             const statusDiv = document.getElementById('syncStatus');
             if (status === 'connected') {
-                statusDiv.innerHTML = '✅ Data Saved';
+                statusDiv.innerHTML = '✅ Firebase Connected';
                 statusDiv.style.background = '#27ae60';
-            } else if (status === 'saving') {
-                statusDiv.innerHTML = '💾 Saving...';
+            } else if (status === 'syncing') {
+                statusDiv.innerHTML = '🔄 Syncing...';
                 statusDiv.style.background = '#f39c12';
+            } else if (status === 'error') {
+                statusDiv.innerHTML = '❌ Firebase Error';
+                statusDiv.style.background = '#e74c3c';
             } else {
                 statusDiv.innerHTML = '📱 Local Storage';
                 statusDiv.style.background = '#3498db';
             }
         }
 
-        // Load students from localStorage
-        function loadStudentsFromStorage() {
-            updateSyncStatus('loading');
-            try {
-                const localData = localStorage.getItem('classStudents');
-                if (localData) {
-                    students = JSON.parse(localData);
+        // Load students from Firebase with fallback
+        function loadStudentsFromFirebase() {
+            updateSyncStatus('syncing');
+            return database.ref('class8/students').once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    if (data && Object.keys(data).length > 0) {
+                        students = data;
+                        updateSyncStatus('connected');
+                        console.log("Data loaded from Firebase:", students);
+                    } else {
+                        // Initialize with default data
+                        students = DEFAULT_STUDENTS.students;
+                        saveStudentsToFirebase();
+                    }
+                    return students;
+                })
+                .catch((error) => {
+                    console.error('Firebase Error:', error);
+                    updateSyncStatus('error');
+                    // Fallback to localStorage
+                    const localData = localStorage.getItem('class8Students');
+                    if (localData) {
+                        students = JSON.parse(localData);
+                    } else {
+                        students = DEFAULT_STUDENTS.students;
+                    }
+                    return students;
+                });
+        }
+
+        // Save students to Firebase with fallback
+        function saveStudentsToFirebase() {
+            updateSyncStatus('syncing');
+            
+            // Update lastUpdated timestamp
+            const updateData = {
+                students: students,
+                lastUpdated: new Date().toISOString(),
+                version: "1.0"
+            };
+            
+            return database.ref('class8').set(updateData)
+                .then(() => {
                     updateSyncStatus('connected');
-                } else {
-                    students = DEFAULT_STUDENTS;
-                    saveStudentsToStorage();
+                    // Also save to localStorage as backup
+                    localStorage.setItem('class8Students', JSON.stringify(students));
+                    localStorage.setItem('class8LastUpdated', new Date().toISOString());
+                    return true;
+                })
+                .catch((error) => {
+                    console.error('Firebase Save Error:', error);
+                    updateSyncStatus('error');
+                    // Fallback to localStorage
+                    localStorage.setItem('class8Students', JSON.stringify(students));
+                    localStorage.setItem('class8LastUpdated', new Date().toISOString());
+                    return false;
+                });
+        }
+
+        // Real-time updates from Firebase
+        function setupRealTimeUpdates() {
+            database.ref('class8/students').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    students = data;
+                    console.log("Real-time update received:", students);
+                    
+                    // Update UI based on current view
+                    if (document.getElementById('adminSection').style.display === 'block') {
+                        loadStudents();
+                        loadJSONData();
+                    } else if (document.getElementById('publicSection').style.display === 'block') {
+                        loadPublicStudents();
+                        loadTopStudents();
+                    }
+                    updateSyncStatus('connected');
+                    
+                    // Show update notification
+                    showFlash('Data updated in real-time!', 'success');
                 }
-                return Promise.resolve(students);
+            });
+        }
+
+        // Load and display JSON data
+        function loadJSONData() {
+            const jsonDataDiv = document.getElementById('jsonData');
+            const adminJsonDataDiv = document.getElementById('adminJSONData');
+            
+            const jsonData = {
+                students: students,
+                lastUpdated: localStorage.getItem('class8LastUpdated') || new Date().toISOString(),
+                totalStudents: Object.keys(students).length,
+                version: "1.0"
+            };
+            
+            const formattedJSON = JSON.stringify(jsonData, null, 2);
+            
+            if (jsonDataDiv) jsonDataDiv.textContent = formattedJSON;
+            if (adminJsonDataDiv) adminJsonDataDiv.textContent = formattedJSON;
+        }
+
+        // Export JSON data
+        function exportJSON() {
+            const jsonData = {
+                students: students,
+                lastUpdated: localStorage.getItem('class8LastUpdated') || new Date().toISOString(),
+                totalStudents: Object.keys(students).length,
+                version: "1.0"
+            };
+            
+            const dataStr = JSON.stringify(jsonData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `class8_students_${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showFlash('JSON data exported successfully!', 'success');
+        }
+
+        // Show import JSON section
+        function showImportJSON() {
+            document.getElementById('importJSONSection').style.display = 'block';
+        }
+
+        // Hide import JSON section
+        function hideImportJSON() {
+            document.getElementById('importJSONSection').style.display = 'none';
+            document.getElementById('importJSONData').value = '';
+        }
+
+        // Import JSON data
+        function importJSON() {
+            const jsonData = document.getElementById('importJSONData').value;
+            
+            if (!jsonData) {
+                showFlash('Please paste JSON data!', 'error');
+                return;
+            }
+            
+            try {
+                const parsedData = JSON.parse(jsonData);
+                
+                if (parsedData.students && typeof parsedData.students === 'object') {
+                    students = parsedData.students;
+                    
+                    saveStudentsToFirebase().then((success) => {
+                        if (success) {
+                            loadStudents();
+                            loadJSONData();
+                            hideImportJSON();
+                            showFlash('JSON data imported successfully!', 'success');
+                        } else {
+                            showFlash('Error saving imported data.', 'error');
+                        }
+                    });
+                } else {
+                    showFlash('Invalid JSON format. Must contain "students" object.', 'error');
+                }
             } catch (error) {
-                console.error('Error loading data:', error);
-                students = DEFAULT_STUDENTS;
-                updateSyncStatus('error');
-                return Promise.resolve(students);
+                showFlash('Invalid JSON format. Please check your data.', 'error');
+                console.error('JSON Parse Error:', error);
             }
         }
 
-        // Save students to localStorage
-        function saveStudentsToStorage() {
-            updateSyncStatus('saving');
-            try {
-                localStorage.setItem('classStudents', JSON.stringify(students));
-                updateSyncStatus('connected');
-                return Promise.resolve(true);
-            } catch (error) {
-                console.error('Error saving data:', error);
-                updateSyncStatus('error');
-                return Promise.resolve(false);
+        // Reset to default data
+        function resetToDefault() {
+            if (confirm('Are you sure you want to reset all data to default? This cannot be undone.')) {
+                students = DEFAULT_STUDENTS.students;
+                
+                saveStudentsToFirebase().then((success) => {
+                    if (success) {
+                        loadStudents();
+                        loadJSONData();
+                        showFlash('Data reset to default successfully!', 'success');
+                    } else {
+                        showFlash('Error resetting data.', 'error');
+                    }
+                });
             }
         }
 
@@ -450,10 +723,12 @@
             }
 
             if (USERS[username] && USERS[username].password === password) {
-                messageDiv.innerHTML = '<div style="background:#d4edda;color:#155724;padding:10px;border-radius:5px;">Loading data...</div>';
+                messageDiv.innerHTML = '<div style="background:#d4edda;color:#155724;padding:10px;border-radius:5px;">Connecting to Firebase...</div>';
                 
                 try {
-                    await loadStudentsFromStorage();
+                    await loadStudentsFromFirebase();
+                    setupRealTimeUpdates();
+                    loadJSONData();
                     
                     document.getElementById('loginSection').style.display = 'none';
                     
@@ -471,7 +746,17 @@
                     document.getElementById('password').value = '';
                     
                 } catch (error) {
-                    messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Error loading data. Please try again.</div>';
+                    messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Error loading data. Using local storage.</div>';
+                    // Continue with local data
+                    document.getElementById('loginSection').style.display = 'none';
+                    if (USERS[username].role === 'admin') {
+                        document.getElementById('adminSection').style.display = 'block';
+                        loadStudents();
+                    } else {
+                        document.getElementById('publicSection').style.display = 'block';
+                        loadPublicStudents();
+                        loadTopStudents();
+                    }
                 }
             } else {
                 messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Invalid username or password!</div>';
@@ -487,6 +772,7 @@
             document.getElementById('password').value = '';
             document.getElementById('loginMessage').innerHTML = '';
             hideAllForms();
+            loadJSONData();
         }
 
         // Load students for public view
@@ -592,6 +878,7 @@
         // Add new student
         async function addStudent() {
             const name = document.getElementById('newStudentName').value.trim();
+            const marks = parseInt(document.getElementById('newStudentMarks').value) || 100;
             
             if (!name) {
                 showFlash('Please enter student name!', 'error');
@@ -604,20 +891,20 @@
             }
 
             students[name] = {
-                marks: 100,
+                marks: marks,
                 history: [{
                     type: 'added',
-                    marks: 100,
+                    marks: marks,
                     reason: 'Initial marks',
                     date: new Date().toLocaleString()
                 }]
             };
 
-            const success = await saveStudentsToStorage();
+            const success = await saveStudentsToFirebase();
             if (success) {
                 loadStudents();
                 hideAllForms();
-                showFlash(`Student ${name} added successfully!`, 'success');
+                showFlash(`Student ${name} added successfully with ${marks} marks!`, 'success');
             } else {
                 showFlash('Error saving student. Please try again.', 'error');
             }
@@ -657,7 +944,7 @@
                 date: new Date().toLocaleString()
             });
 
-            const success = await saveStudentsToStorage();
+            const success = await saveStudentsToFirebase();
             if (success) {
                 loadStudents();
                 hideAllForms();
@@ -696,7 +983,7 @@
                 date: new Date().toLocaleString()
             });
 
-            const success = await saveStudentsToStorage();
+            const success = await saveStudentsToFirebase();
             if (success) {
                 loadStudents();
                 hideAllForms();
@@ -717,6 +1004,7 @@
             let historyHTML = `
                 <div style="text-align:center;background:#34495e;color:white;padding:10px;border-radius:10px 10px 0 0;">
                     <h3>History for ${studentName}</h3>
+                    <p>Current Marks: ${student.marks}</p>
                 </div>
                 <div style="max-height:400px;overflow-y:auto;padding:10px;">
             `;
@@ -797,7 +1085,7 @@
         async function deleteStudent(studentName) {
             if (confirm(`Are you sure you want to delete ${studentName}? This action cannot be undone.`)) {
                 delete students[studentName];
-                const success = await saveStudentsToStorage();
+                const success = await saveStudentsToFirebase();
                 if (success) {
                     loadStudents();
                     showFlash(`Student ${studentName} deleted successfully!`, 'success');
@@ -843,13 +1131,22 @@
             document.getElementById('addMarksForm').style.display = 'block';
         }
 
+        function showJSONManager() {
+            hideAllForms();
+            document.getElementById('jsonManagerForm').style.display = 'block';
+            loadJSONData();
+        }
+
         function hideAllForms() {
             document.getElementById('addStudentForm').style.display = 'none';
             document.getElementById('deductMarksForm').style.display = 'none';
             document.getElementById('addMarksForm').style.display = 'none';
+            document.getElementById('jsonManagerForm').style.display = 'none';
+            hideImportJSON();
             
             // Clear form fields
             document.getElementById('newStudentName').value = '';
+            document.getElementById('newStudentMarks').value = '100';
             document.getElementById('deductMarks').value = '';
             document.getElementById('deductReason').value = '';
             document.getElementById('addMarks').value = '';
@@ -858,7 +1155,11 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            loadStudentsFromStorage();
+            // Try to load from Firebase, fallback to local
+            loadStudentsFromFirebase().then(() => {
+                setupRealTimeUpdates();
+                loadJSONData();
+            });
             
             // Enter key support for login
             document.getElementById('password').addEventListener('keypress', function(e) {
@@ -868,5 +1169,9 @@
             });
         });
     </script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </body>
 </html>
