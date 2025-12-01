@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Class Monitor System - Firebase Sync</title>
+    <title>Class Monitor System</title>
     <style>
         * {
             margin: 0;
@@ -84,10 +84,6 @@
         
         .btn-success {
             background: linear-gradient(135deg, #27ae60, #219a52);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
         }
         
         .action-buttons {
@@ -187,12 +183,6 @@
             text-align: center;
         }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            font-size: 18px;
-        }
-
         .sync-status {
             position: fixed;
             top: 10px;
@@ -203,26 +193,6 @@
             border-radius: 5px;
             font-size: 12px;
             z-index: 1000;
-        }
-        
-        .json-section {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #3498db;
-        }
-        
-        .json-data {
-            background: #2c3e50;
-            color: #ecf0f1;
-            padding: 15px;
-            border-radius: 5px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            max-height: 300px;
-            overflow-y: auto;
-            margin-top: 10px;
         }
         
         @media (max-width: 768px) {
@@ -242,37 +212,30 @@
     </style>
 </head>
 <body>
-    <div class="sync-status" id="syncStatus">🔄 Loading...</div>
+    <div class="sync-status" id="syncStatus">📱 Local Mode</div>
     
     <div class="container">
         <header>
             <h1>🎓 Class Monitor System</h1>
-            <p>Firebase Connected - Real-time Sync Across All Devices</p>
+            <p>Monitor and manage student marks efficiently</p>
         </header>
 
         <!-- Login Section -->
         <section id="loginSection" class="login-section">
             <h2>Login</h2>
             <div class="form-group">
-                <input type="text" id="username" placeholder="Enter username">
+                <input type="text" id="username" placeholder="Enter username" value="admin">
             </div>
             <div class="form-group">
-                <input type="password" id="password" placeholder="Enter password">
+                <input type="password" id="password" placeholder="Enter password" value="admin123">
             </div>
             <button class="btn" onclick="login()">Login</button>
             <div id="loginMessage" style="margin-top: 15px;"></div>
             
             <div style="margin-top: 20px; background: #e3f2fd; padding: 15px; border-radius: 8px;">
-                <h3>Login Credentials:</h3>
-                    
+                <h3>Login Credentials (Auto-filled):</h3>
+                <p><strong>Admin:</strong> admin / admin123</p>
                 <p><strong>Students:</strong> student / student123</p>
-                <p><strong>Class View:</strong> class8 / class8123</p>
-            </div>
-
-            <div class="json-section">
-                <h3>📊 Current JSON Data</h3>
-                <button class="btn btn-warning" onclick="loadJSONData()">Refresh JSON Data</button>
-                <div id="jsonData" class="json-data">Loading...</div>
             </div>
         </section>
 
@@ -333,7 +296,7 @@
                 <button class="btn" onclick="showAddStudent()">➕ Add Student</button>
                 <button class="btn" onclick="showDeductMarks()">➖ Deduct Marks</button>
                 <button class="btn btn-success" onclick="showAddMarks()">➕ Add Marks</button>
-                <button class="btn btn-warning" onclick="showJSONManager()">📁 JSON Manager</button>
+                <button class="btn btn-success" onclick="saveDataManually()">💾 Save Data</button>
             </div>
 
             <!-- Add Student Form -->
@@ -343,7 +306,7 @@
                     <input type="text" id="newStudentName" placeholder="Enter student full name">
                 </div>
                 <div class="form-group">
-                    <input type="number" id="newStudentMarks" placeholder="Initial marks (default: 100)" value="100" min="0" max="100">
+                    <input type="number" id="newStudentMarks" placeholder="Initial marks" value="100" min="0" max="100">
                 </div>
                 <button class="btn" onclick="addStudent()">Add Student</button>
                 <button class="btn btn-danger" onclick="hideAllForms()">Cancel</button>
@@ -385,32 +348,6 @@
                 <button class="btn btn-danger" onclick="hideAllForms()">Cancel</button>
             </div>
 
-            <!-- JSON Manager -->
-            <div id="jsonManagerForm" class="action-box" style="display: none;">
-                <h3>📁 JSON Data Manager</h3>
-                <p>Export and import student data as JSON for backup or sharing.</p>
-                
-                <div class="action-buttons">
-                    <button class="btn btn-success" onclick="exportJSON()">📤 Export JSON</button>
-                    <button class="btn" onclick="showImportJSON()">📥 Import JSON</button>
-                    <button class="btn btn-danger" onclick="resetToDefault()">🔄 Reset to Default</button>
-                </div>
-                
-                <div id="importJSONSection" style="display: none; margin-top: 20px;">
-                    <div class="form-group">
-                        <textarea id="importJSONData" placeholder="Paste JSON data here" rows="10"></textarea>
-                    </div>
-                    <button class="btn btn-success" onclick="importJSON()">Import Data</button>
-                    <button class="btn btn-danger" onclick="hideImportJSON()">Cancel</button>
-                </div>
-                
-                <div class="json-section" style="margin-top: 20px;">
-                    <h4>Current JSON Data</h4>
-                    <button class="btn btn-warning" onclick="loadJSONData()">Refresh</button>
-                    <div id="adminJSONData" class="json-data">Loading...</div>
-                </div>
-            </div>
-
             <!-- Students List -->
             <div id="adminStudentsList">
                 <h3>📋 Students List</h3>
@@ -433,76 +370,18 @@
         // User credentials
         const USERS = {
             'admin': { password: 'admin123', role: 'admin' },
-            'student': { password: 'student123', role: 'publicStudent' },
-            'class8': { password: 'class8123', role: 'publicStudent' }
+            'student': { password: 'student123', role: 'publicStudent' }
         };
 
-        // Default students data with proper JSON structure
+        // Default students data - SIMPLE AND WORKING
         const DEFAULT_STUDENTS = {
-            "students": {
-                "Rahul Sharma": { 
-                    "marks": 95, 
-                    "history": [
-                        {
-                            "type": "initial",
-                            "marks": 95,
-                            "reason": "Initial marks",
-                            "date": new Date().toLocaleString()
-                        }
-                    ]
-                },
-                "Priya Patel": { 
-                    "marks": 88, 
-                    "history": [
-                        {
-                            "type": "initial",
-                            "marks": 88,
-                            "reason": "Initial marks",
-                            "date": new Date().toLocaleString()
-                        }
-                    ]
-                },
-                "Amit Kumar": { 
-                    "marks": 76, 
-                    "history": [
-                        {
-                            "type": "initial",
-                            "marks": 76,
-                            "reason": "Initial marks",
-                            "date": new Date().toLocaleString()
-                        }
-                    ]
-                },
-                "Sneha Singh": { 
-                    "marks": 92, 
-                    "history": [
-                        {
-                            "type": "initial",
-                            "marks": 92,
-                            "reason": "Initial marks",
-                            "date": new Date().toLocaleString()
-                        }
-                    ]
-                }
-            },
-            "lastUpdated": new Date().toISOString(),
-            "version": "1.0"
+            'Rahul Sharma': { marks: 95, history: [] },
+            'Priya Patel': { marks: 88, history: [] },
+            'Amit Kumar': { marks: 76, history: [] },
+            'Sneha Singh': { marks: 92, history: [] },
+            'Rohit Verma': { marks: 81, history: [] },
+            'Neha Gupta': { marks: 89, history: [] }
         };
-
-        // 🔥 YAHAN APNA FIREBASE CONFIG DALIYE
-        const firebaseConfig = {
-            apiKey: "AIzaSyBThKOtZFQ7JgfPiFAySQwNuJykcsxCMsw",
-            authDomain: "class-monitor-system-8th.firebaseapp.com",
-            databaseURL: "https://class-monitor-system-8th-default-rtdb.firebaseio.com",
-            projectId: "class-monitor-system-8th",
-            storageBucket: "class-monitor-system-8th.firebasestorage.app",
-            messagingSenderId: "706492805118",
-            appId: "1:706492805118:web:066469bd8231f1048c9aaf"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
 
         // Global students variable
         let students = {};
@@ -510,253 +389,56 @@
         // Update sync status
         function updateSyncStatus(status) {
             const statusDiv = document.getElementById('syncStatus');
-            if (status === 'connected') {
-                statusDiv.innerHTML = '✅ Firebase Connected';
-                statusDiv.style.background = '#27ae60';
-            } else if (status === 'syncing') {
-                statusDiv.innerHTML = '🔄 Syncing...';
-                statusDiv.style.background = '#f39c12';
-            } else if (status === 'error') {
-                statusDiv.innerHTML = '❌ Firebase Error';
-                statusDiv.style.background = '#e74c3c';
+            statusDiv.innerHTML = '✅ Local Storage';
+            statusDiv.style.background = '#27ae60';
+        }
+
+        // Load students from localStorage - SIMPLE VERSION
+        function loadStudentsFromStorage() {
+            const localData = localStorage.getItem('classStudents');
+            if (localData) {
+                students = JSON.parse(localData);
             } else {
-                statusDiv.innerHTML = '📱 Local Storage';
-                statusDiv.style.background = '#3498db';
+                students = DEFAULT_STUDENTS;
+                localStorage.setItem('classStudents', JSON.stringify(students));
             }
+            updateSyncStatus('connected');
+            return students;
         }
 
-        // Load students from Firebase with fallback
-        function loadStudentsFromFirebase() {
-            updateSyncStatus('syncing');
-            return database.ref('class8/students').once('value')
-                .then((snapshot) => {
-                    const data = snapshot.val();
-                    if (data && Object.keys(data).length > 0) {
-                        students = data;
-                        updateSyncStatus('connected');
-                        console.log("Data loaded from Firebase:", students);
-                    } else {
-                        // Initialize with default data
-                        students = DEFAULT_STUDENTS.students;
-                        saveStudentsToFirebase();
-                    }
-                    return students;
-                })
-                .catch((error) => {
-                    console.error('Firebase Error:', error);
-                    updateSyncStatus('error');
-                    // Fallback to localStorage
-                    const localData = localStorage.getItem('class8Students');
-                    if (localData) {
-                        students = JSON.parse(localData);
-                    } else {
-                        students = DEFAULT_STUDENTS.students;
-                    }
-                    return students;
-                });
+        // Save students to localStorage - SIMPLE VERSION
+        function saveStudentsToStorage() {
+            localStorage.setItem('classStudents', JSON.stringify(students));
+            updateSyncStatus('saved');
+            showFlash('Data saved successfully!', 'success');
+            return true;
         }
 
-        // Save students to Firebase with fallback
-        function saveStudentsToFirebase() {
-            updateSyncStatus('syncing');
-            
-            // Update lastUpdated timestamp
-            const updateData = {
-                students: students,
-                lastUpdated: new Date().toISOString(),
-                version: "1.0"
-            };
-            
-            return database.ref('class8').set(updateData)
-                .then(() => {
-                    updateSyncStatus('connected');
-                    // Also save to localStorage as backup
-                    localStorage.setItem('class8Students', JSON.stringify(students));
-                    localStorage.setItem('class8LastUpdated', new Date().toISOString());
-                    return true;
-                })
-                .catch((error) => {
-                    console.error('Firebase Save Error:', error);
-                    updateSyncStatus('error');
-                    // Fallback to localStorage
-                    localStorage.setItem('class8Students', JSON.stringify(students));
-                    localStorage.setItem('class8LastUpdated', new Date().toISOString());
-                    return false;
-                });
+        // Manual save button
+        function saveDataManually() {
+            saveStudentsToStorage();
         }
 
-        // Real-time updates from Firebase
-        function setupRealTimeUpdates() {
-            database.ref('class8/students').on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    students = data;
-                    console.log("Real-time update received:", students);
-                    
-                    // Update UI based on current view
-                    if (document.getElementById('adminSection').style.display === 'block') {
-                        loadStudents();
-                        loadJSONData();
-                    } else if (document.getElementById('publicSection').style.display === 'block') {
-                        loadPublicStudents();
-                        loadTopStudents();
-                    }
-                    updateSyncStatus('connected');
-                    
-                    // Show update notification
-                    showFlash('Data updated in real-time!', 'success');
-                }
-            });
-        }
-
-        // Load and display JSON data
-        function loadJSONData() {
-            const jsonDataDiv = document.getElementById('jsonData');
-            const adminJsonDataDiv = document.getElementById('adminJSONData');
-            
-            const jsonData = {
-                students: students,
-                lastUpdated: localStorage.getItem('class8LastUpdated') || new Date().toISOString(),
-                totalStudents: Object.keys(students).length,
-                version: "1.0"
-            };
-            
-            const formattedJSON = JSON.stringify(jsonData, null, 2);
-            
-            if (jsonDataDiv) jsonDataDiv.textContent = formattedJSON;
-            if (adminJsonDataDiv) adminJsonDataDiv.textContent = formattedJSON;
-        }
-
-        // Export JSON data
-        function exportJSON() {
-            const jsonData = {
-                students: students,
-                lastUpdated: localStorage.getItem('class8LastUpdated') || new Date().toISOString(),
-                totalStudents: Object.keys(students).length,
-                version: "1.0"
-            };
-            
-            const dataStr = JSON.stringify(jsonData, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = `class8_students_${new Date().toISOString().split('T')[0]}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-            
-            showFlash('JSON data exported successfully!', 'success');
-        }
-
-        // Show import JSON section
-        function showImportJSON() {
-            document.getElementById('importJSONSection').style.display = 'block';
-        }
-
-        // Hide import JSON section
-        function hideImportJSON() {
-            document.getElementById('importJSONSection').style.display = 'none';
-            document.getElementById('importJSONData').value = '';
-        }
-
-        // Import JSON data
-        function importJSON() {
-            const jsonData = document.getElementById('importJSONData').value;
-            
-            if (!jsonData) {
-                showFlash('Please paste JSON data!', 'error');
-                return;
-            }
-            
-            try {
-                const parsedData = JSON.parse(jsonData);
-                
-                if (parsedData.students && typeof parsedData.students === 'object') {
-                    students = parsedData.students;
-                    
-                    saveStudentsToFirebase().then((success) => {
-                        if (success) {
-                            loadStudents();
-                            loadJSONData();
-                            hideImportJSON();
-                            showFlash('JSON data imported successfully!', 'success');
-                        } else {
-                            showFlash('Error saving imported data.', 'error');
-                        }
-                    });
-                } else {
-                    showFlash('Invalid JSON format. Must contain "students" object.', 'error');
-                }
-            } catch (error) {
-                showFlash('Invalid JSON format. Please check your data.', 'error');
-                console.error('JSON Parse Error:', error);
-            }
-        }
-
-        // Reset to default data
-        function resetToDefault() {
-            if (confirm('Are you sure you want to reset all data to default? This cannot be undone.')) {
-                students = DEFAULT_STUDENTS.students;
-                
-                saveStudentsToFirebase().then((success) => {
-                    if (success) {
-                        loadStudents();
-                        loadJSONData();
-                        showFlash('Data reset to default successfully!', 'success');
-                    } else {
-                        showFlash('Error resetting data.', 'error');
-                    }
-                });
-            }
-        }
-
-        // Login function
-        async function login() {
+        // Login function - SIMPLE VERSION
+        function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const messageDiv = document.getElementById('loginMessage');
 
-            if (!username || !password) {
-                messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Please enter both username and password!</div>';
-                return;
-            }
-
             if (USERS[username] && USERS[username].password === password) {
-                messageDiv.innerHTML = '<div style="background:#d4edda;color:#155724;padding:10px;border-radius:5px;">Connecting to Firebase...</div>';
+                messageDiv.innerHTML = '<div style="background:#d4edda;color:#155724;padding:10px;border-radius:5px;">Login successful!</div>';
                 
-                try {
-                    await loadStudentsFromFirebase();
-                    setupRealTimeUpdates();
-                    loadJSONData();
-                    
-                    document.getElementById('loginSection').style.display = 'none';
-                    
-                    if (USERS[username].role === 'admin') {
-                        document.getElementById('adminSection').style.display = 'block';
-                        loadStudents();
-                    } else {
-                        document.getElementById('publicSection').style.display = 'block';
-                        loadPublicStudents();
-                        loadTopStudents();
-                    }
-                    
-                    // Clear login fields
-                    document.getElementById('username').value = '';
-                    document.getElementById('password').value = '';
-                    
-                } catch (error) {
-                    messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Error loading data. Using local storage.</div>';
-                    // Continue with local data
-                    document.getElementById('loginSection').style.display = 'none';
-                    if (USERS[username].role === 'admin') {
-                        document.getElementById('adminSection').style.display = 'block';
-                        loadStudents();
-                    } else {
-                        document.getElementById('publicSection').style.display = 'block';
-                        loadPublicStudents();
-                        loadTopStudents();
-                    }
+                loadStudentsFromStorage();
+                
+                document.getElementById('loginSection').style.display = 'none';
+                
+                if (USERS[username].role === 'admin') {
+                    document.getElementById('adminSection').style.display = 'block';
+                    loadStudents();
+                } else {
+                    document.getElementById('publicSection').style.display = 'block';
+                    loadPublicStudents();
+                    loadTopStudents();
                 }
             } else {
                 messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Invalid username or password!</div>';
@@ -768,11 +450,10 @@
             document.getElementById('adminSection').style.display = 'none';
             document.getElementById('publicSection').style.display = 'none';
             document.getElementById('loginSection').style.display = 'block';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'admin123';
             document.getElementById('loginMessage').innerHTML = '';
             hideAllForms();
-            loadJSONData();
         }
 
         // Load students for public view
@@ -875,8 +556,8 @@
             }
         }
 
-        // Add new student
-        async function addStudent() {
+        // Add new student - SIMPLE AND WORKING VERSION
+        function addStudent() {
             const name = document.getElementById('newStudentName').value.trim();
             const marks = parseInt(document.getElementById('newStudentMarks').value) || 100;
             
@@ -890,6 +571,7 @@
                 return;
             }
 
+            // SIMPLE ADD - NO COMPLEX FIREBASE
             students[name] = {
                 marks: marks,
                 history: [{
@@ -900,18 +582,15 @@
                 }]
             };
 
-            const success = await saveStudentsToFirebase();
-            if (success) {
-                loadStudents();
-                hideAllForms();
-                showFlash(`Student ${name} added successfully with ${marks} marks!`, 'success');
-            } else {
-                showFlash('Error saving student. Please try again.', 'error');
-            }
+            // IMMEDIATELY SAVE AND UPDATE
+            saveStudentsToStorage();
+            loadStudents();
+            hideAllForms();
+            showFlash(`Student ${name} added successfully with ${marks} marks!`, 'success');
         }
 
-        // Deduct marks
-        async function deductMarks() {
+        // Deduct marks - SIMPLE VERSION
+        function deductMarks() {
             const name = document.getElementById('deductStudent').value;
             const marks = parseInt(document.getElementById('deductMarks').value);
             const reason = document.getElementById('deductReason').value.trim();
@@ -921,18 +600,8 @@
                 return;
             }
 
-            if (marks <= 0) {
-                showFlash('Please enter valid marks to deduct!', 'error');
-                return;
-            }
-
             if (!students[name]) {
                 showFlash('Student not found!', 'error');
-                return;
-            }
-
-            if (students[name].marks - marks < 0) {
-                showFlash('Cannot deduct more marks than available!', 'error');
                 return;
             }
 
@@ -944,29 +613,20 @@
                 date: new Date().toLocaleString()
             });
 
-            const success = await saveStudentsToFirebase();
-            if (success) {
-                loadStudents();
-                hideAllForms();
-                showFlash(`Deducted ${marks} marks from ${name}. Reason: ${reason}`, 'success');
-            } else {
-                showFlash('Error deducting marks. Please try again.', 'error');
-            }
+            saveStudentsToStorage();
+            loadStudents();
+            hideAllForms();
+            showFlash(`Deducted ${marks} marks from ${name}. Reason: ${reason}`, 'success');
         }
 
-        // Add marks
-        async function addMarks() {
+        // Add marks - SIMPLE VERSION
+        function addMarks() {
             const name = document.getElementById('addStudent').value;
             const marks = parseInt(document.getElementById('addMarks').value);
             const reason = document.getElementById('addReason').value.trim();
 
             if (!name || !marks || !reason) {
                 showFlash('Please fill all fields!', 'error');
-                return;
-            }
-
-            if (marks <= 0) {
-                showFlash('Please enter valid marks to add!', 'error');
                 return;
             }
 
@@ -983,115 +643,43 @@
                 date: new Date().toLocaleString()
             });
 
-            const success = await saveStudentsToFirebase();
-            if (success) {
-                loadStudents();
-                hideAllForms();
-                showFlash(`Added ${marks} marks to ${name}. Reason: ${reason}`, 'success');
-            } else {
-                showFlash('Error adding marks. Please try again.', 'error');
-            }
+            saveStudentsToStorage();
+            loadStudents();
+            hideAllForms();
+            showFlash(`Added ${marks} marks to ${name}. Reason: ${reason}`, 'success');
         }
 
         // View student history
         function viewHistory(studentName) {
             const student = students[studentName];
-            if (!student || !student.history || student.history.length === 0) {
-                alert(`No history available for ${studentName}`);
-                return;
+            let historyHTML = '<h3>History for ' + studentName + '</h3>';
+            
+            if (student.history && student.history.length > 0) {
+                student.history.forEach(record => {
+                    const color = record.type === 'added' ? 'green' : 'red';
+                    historyHTML += `
+                        <div style="background:#f8f9fa;padding:10px;margin:5px 0;border-radius:5px;border-left:3px solid ${color}">
+                            <strong style="color:${color}">${record.type.toUpperCase()}</strong><br>
+                            Marks: ${record.marks}<br>
+                            Reason: ${record.reason}<br>
+                            Date: ${record.date}
+                        </div>
+                    `;
+                });
+            } else {
+                historyHTML += '<p>No history available</p>';
             }
-
-            let historyHTML = `
-                <div style="text-align:center;background:#34495e;color:white;padding:10px;border-radius:10px 10px 0 0;">
-                    <h3>History for ${studentName}</h3>
-                    <p>Current Marks: ${student.marks}</p>
-                </div>
-                <div style="max-height:400px;overflow-y:auto;padding:10px;">
-            `;
             
-            student.history.forEach((record, index) => {
-                const color = record.type === 'added' ? '#27ae60' : '#e74c3c';
-                const icon = record.type === 'added' ? '➕' : '➖';
-                historyHTML += `
-                    <div style="background:#f8f9fa;padding:12px;margin:8px 0;border-radius:8px;border-left:4px solid ${color}">
-                        <strong>${icon} ${record.type.toUpperCase()}</strong><br>
-                        <strong>Marks:</strong> ${record.marks}<br>
-                        <strong>Reason:</strong> ${record.reason}<br>
-                        <strong>Date:</strong> ${record.date}
-                    </div>
-                `;
-            });
-            
-            historyHTML += '</div>';
-            
-            // Create custom modal
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 1000;
-            `;
-            
-            const modalContent = document.createElement('div');
-            modalContent.style.cssText = `
-                background: white;
-                border-radius: 10px;
-                width: 90%;
-                max-width: 500px;
-                max-height: 80vh;
-                overflow: hidden;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            `;
-            modalContent.innerHTML = historyHTML;
-            
-            const closeButton = document.createElement('button');
-            closeButton.textContent = 'Close';
-            closeButton.style.cssText = `
-                background: #e74c3c;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                cursor: pointer;
-                margin: 10px;
-                display: block;
-                margin-left: auto;
-                margin-right: auto;
-            `;
-            closeButton.onclick = function() {
-                document.body.removeChild(modal);
-            };
-            
-            modalContent.appendChild(closeButton);
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-            
-            // Close modal when clicking outside
-            modal.onclick = function(e) {
-                if (e.target === modal) {
-                    document.body.removeChild(modal);
-                }
-            };
+            alert(historyHTML);
         }
 
         // Delete student
-        async function deleteStudent(studentName) {
-            if (confirm(`Are you sure you want to delete ${studentName}? This action cannot be undone.`)) {
+        function deleteStudent(studentName) {
+            if (confirm(`Are you sure you want to delete ${studentName}?`)) {
                 delete students[studentName];
-                const success = await saveStudentsToFirebase();
-                if (success) {
-                    loadStudents();
-                    showFlash(`Student ${studentName} deleted successfully!`, 'success');
-                } else {
-                    showFlash('Error deleting student. Please try again.', 'error');
-                }
+                saveStudentsToStorage();
+                loadStudents();
+                showFlash(`Student ${studentName} deleted successfully!`, 'success');
             }
         }
 
@@ -1107,12 +695,11 @@
         function showFlash(message, type) {
             const color = type === 'success' ? '#d4edda' : '#f8d7da';
             const textColor = type === 'success' ? '#155724' : '#721c24';
-            const flashDiv = document.getElementById('flashMessage');
-            flashDiv.innerHTML = 
-                `<div style="background:${color};color:${textColor};padding:15px;border-radius:8px;margin:20px 0;border-left:4px solid ${type === 'success' ? '#27ae60' : '#e74c3c'};">${message}</div>`;
+            document.getElementById('flashMessage').innerHTML = 
+                `<div style="background:${color};color:${textColor};padding:15px;border-radius:8px;margin:20px 0;">${message}</div>`;
             setTimeout(() => {
-                flashDiv.innerHTML = '';
-            }, 4000);
+                document.getElementById('flashMessage').innerHTML = '';
+            }, 3000);
         }
 
         // Form display functions
@@ -1131,18 +718,10 @@
             document.getElementById('addMarksForm').style.display = 'block';
         }
 
-        function showJSONManager() {
-            hideAllForms();
-            document.getElementById('jsonManagerForm').style.display = 'block';
-            loadJSONData();
-        }
-
         function hideAllForms() {
             document.getElementById('addStudentForm').style.display = 'none';
             document.getElementById('deductMarksForm').style.display = 'none';
             document.getElementById('addMarksForm').style.display = 'none';
-            document.getElementById('jsonManagerForm').style.display = 'none';
-            hideImportJSON();
             
             // Clear form fields
             document.getElementById('newStudentName').value = '';
@@ -1155,23 +734,11 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Try to load from Firebase, fallback to local
-            loadStudentsFromFirebase().then(() => {
-                setupRealTimeUpdates();
-                loadJSONData();
-            });
-            
-            // Enter key support for login
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    login();
-                }
-            });
+            loadStudentsFromStorage();
+            // Auto-fill login for quick testing
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'admin123';
         });
     </script>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </body>
 </html>
