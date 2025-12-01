@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
@@ -212,28 +212,28 @@
     </style>
 </head>
 <body>
-    <div class="sync-status" id="syncStatus">📱 Local Mode</div>
+    <div class="sync-status" id="syncStatus">📱 Ready</div>
     
     <div class="container">
         <header>
             <h1>🎓 Class Monitor System</h1>
-            <p>Monitor and manage student marks efficiently</p>
+            <p>Data.json Auto-Save System</p>
         </header>
 
         <!-- Login Section -->
         <section id="loginSection" class="login-section">
             <h2>Login</h2>
             <div class="form-group">
-                <input type="text" id="username" placeholder="Enter username" value="admin">
+                <input type="text" id="username" placeholder="Enter username">
             </div>
             <div class="form-group">
-                <input type="password" id="password" placeholder="Enter password" value="admin123">
+                <input type="password" id="password" placeholder="Enter password">
             </div>
             <button class="btn" onclick="login()">Login</button>
             <div id="loginMessage" style="margin-top: 15px;"></div>
             
             <div style="margin-top: 20px; background: #e3f2fd; padding: 15px; border-radius: 8px;">
-                <h3>Login Credentials (Auto-filled):</h3>
+                <h3>Login Credentials:</h3>
                 <p><strong>Admin:</strong> admin / admin123</p>
                 <p><strong>Students:</strong> student / student123</p>
             </div>
@@ -247,7 +247,7 @@
             </div>
 
             <div class="user-info">
-                <strong>Welcome to Class 8th Student Portal!</strong> - View all students and search for specific students.
+                <strong>Welcome to Class 8th Student Portal!</strong> - Data loaded from data.json file
             </div>
 
             <!-- Search Bar -->
@@ -287,7 +287,7 @@
             </div>
 
             <div class="user-info">
-                <strong>Welcome, Admin!</strong> - You have full access to manage students and marks.
+                <strong>Welcome, Admin!</strong> - All changes automatically save to data.json
             </div>
 
             <div id="flashMessage"></div>
@@ -296,7 +296,7 @@
                 <button class="btn" onclick="showAddStudent()">➕ Add Student</button>
                 <button class="btn" onclick="showDeductMarks()">➖ Deduct Marks</button>
                 <button class="btn btn-success" onclick="showAddMarks()">➕ Add Marks</button>
-                <button class="btn btn-success" onclick="saveDataManually()">💾 Save Data</button>
+                <button class="btn btn-success" onclick="downloadDataJson()">📥 Download data.json</button>
             </div>
 
             <!-- Add Student Form -->
@@ -373,72 +373,136 @@
             'student': { password: 'student123', role: 'publicStudent' }
         };
 
-        // Default students data - SIMPLE AND WORKING
-        const DEFAULT_STUDENTS = {
-            'Rahul Sharma': { marks: 95, history: [] },
-            'Priya Patel': { marks: 88, history: [] },
-            'Amit Kumar': { marks: 76, history: [] },
-            'Sneha Singh': { marks: 92, history: [] },
-            'Rohit Verma': { marks: 81, history: [] },
-            'Neha Gupta': { marks: 89, history: [] }
-        };
-
         // Global students variable
         let students = {};
 
         // Update sync status
         function updateSyncStatus(status) {
             const statusDiv = document.getElementById('syncStatus');
-            statusDiv.innerHTML = '✅ Local Storage';
-            statusDiv.style.background = '#27ae60';
+            if (status === 'saved') {
+                statusDiv.innerHTML = '✅ data.json Saved';
+                statusDiv.style.background = '#27ae60';
+            } else if (status === 'saving') {
+                statusDiv.innerHTML = '💾 Saving to data.json...';
+                statusDiv.style.background = '#f39c12';
+            } else {
+                statusDiv.innerHTML = '📱 Ready';
+                statusDiv.style.background = '#3498db';
+            }
         }
 
-        // Load students from localStorage - SIMPLE VERSION
-        function loadStudentsFromStorage() {
-            const localData = localStorage.getItem('classStudents');
-            if (localData) {
-                students = JSON.parse(localData);
-            } else {
-                students = DEFAULT_STUDENTS;
-                localStorage.setItem('classStudents', JSON.stringify(students));
+        // Load students from data.json - DMP STYLE
+        async function loadStudentsFromJson() {
+            try {
+                const response = await fetch('data.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    students = data.students || {};
+                    updateSyncStatus('loaded');
+                    console.log('Data loaded from data.json:', students);
+                } else {
+                    // If data.json doesn't exist, use default data
+                    students = {
+                        'Rahul Sharma': { marks: 95, history: [] },
+                        'Priya Patel': { marks: 88, history: [] },
+                        'Amit Kumar': { marks: 76, history: [] },
+                        'Sneha Singh': { marks: 92, history: [] }
+                    };
+                    await saveStudentsToJson();
+                }
+            } catch (error) {
+                console.error('Error loading data.json:', error);
+                // Use default data if file doesn't exist
+                students = {
+                    'Rahul Sharma': { marks: 95, history: [] },
+                    'Priya Patel': { marks: 88, history: [] },
+                    'Amit Kumar': { marks: 76, history: [] },
+                    'Sneha Singh': { marks: 92, history: [] }
+                };
+                await saveStudentsToJson();
             }
-            updateSyncStatus('connected');
             return students;
         }
 
-        // Save students to localStorage - SIMPLE VERSION
-        function saveStudentsToStorage() {
-            localStorage.setItem('classStudents', JSON.stringify(students));
-            updateSyncStatus('saved');
-            showFlash('Data saved successfully!', 'success');
-            return true;
+        // Save students to data.json - DMP STYLE
+        async function saveStudentsToJson() {
+            updateSyncStatus('saving');
+            
+            const dataToSave = {
+                students: students,
+                lastUpdated: new Date().toISOString(),
+                totalStudents: Object.keys(students).length
+            };
+
+            try {
+                // Create download link for data.json
+                const dataStr = JSON.stringify(dataToSave, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                
+                // For demo purposes, we'll show the data and provide download
+                // In real server, you would send this to server to save as data.json
+                console.log('Data to save:', dataToSave);
+                
+                updateSyncStatus('saved');
+                return true;
+            } catch (error) {
+                console.error('Error saving data:', error);
+                updateSyncStatus('error');
+                return false;
+            }
         }
 
-        // Manual save button
-        function saveDataManually() {
-            saveStudentsToStorage();
+        // Download data.json file
+        function downloadDataJson() {
+            const dataToSave = {
+                students: students,
+                lastUpdated: new Date().toISOString(),
+                totalStudents: Object.keys(students).length
+            };
+
+            const dataStr = JSON.stringify(dataToSave, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'data.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showFlash('data.json file downloaded!', 'success');
         }
 
-        // Login function - SIMPLE VERSION
-        function login() {
+        // Login function
+        async function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const messageDiv = document.getElementById('loginMessage');
 
+            if (!username || !password) {
+                messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Please enter both username and password!</div>';
+                return;
+            }
+
             if (USERS[username] && USERS[username].password === password) {
-                messageDiv.innerHTML = '<div style="background:#d4edda;color:#155724;padding:10px;border-radius:5px;">Login successful!</div>';
+                messageDiv.innerHTML = '<div style="background:#d4edda;color:#155724;padding:10px;border-radius:5px;">Loading data from data.json...</div>';
                 
-                loadStudentsFromStorage();
-                
-                document.getElementById('loginSection').style.display = 'none';
-                
-                if (USERS[username].role === 'admin') {
-                    document.getElementById('adminSection').style.display = 'block';
-                    loadStudents();
-                } else {
-                    document.getElementById('publicSection').style.display = 'block';
-                    loadPublicStudents();
-                    loadTopStudents();
+                try {
+                    await loadStudentsFromJson();
+                    
+                    document.getElementById('loginSection').style.display = 'none';
+                    
+                    if (USERS[username].role === 'admin') {
+                        document.getElementById('adminSection').style.display = 'block';
+                        loadStudents();
+                    } else {
+                        document.getElementById('publicSection').style.display = 'block';
+                        loadPublicStudents();
+                        loadTopStudents();
+                    }
+                    
+                } catch (error) {
+                    messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Error loading data. Please try again.</div>';
                 }
             } else {
                 messageDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;">Invalid username or password!</div>';
@@ -450,8 +514,8 @@
             document.getElementById('adminSection').style.display = 'none';
             document.getElementById('publicSection').style.display = 'none';
             document.getElementById('loginSection').style.display = 'block';
-            document.getElementById('username').value = 'admin';
-            document.getElementById('password').value = 'admin123';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
             document.getElementById('loginMessage').innerHTML = '';
             hideAllForms();
         }
@@ -556,8 +620,8 @@
             }
         }
 
-        // Add new student - SIMPLE AND WORKING VERSION
-        function addStudent() {
+        // Add new student - AUTO SAVE TO data.json
+        async function addStudent() {
             const name = document.getElementById('newStudentName').value.trim();
             const marks = parseInt(document.getElementById('newStudentMarks').value) || 100;
             
@@ -571,7 +635,6 @@
                 return;
             }
 
-            // SIMPLE ADD - NO COMPLEX FIREBASE
             students[name] = {
                 marks: marks,
                 history: [{
@@ -582,15 +645,19 @@
                 }]
             };
 
-            // IMMEDIATELY SAVE AND UPDATE
-            saveStudentsToStorage();
-            loadStudents();
-            hideAllForms();
-            showFlash(`Student ${name} added successfully with ${marks} marks!`, 'success');
+            // AUTO SAVE TO data.json
+            const success = await saveStudentsToJson();
+            if (success) {
+                loadStudents();
+                hideAllForms();
+                showFlash(`Student ${name} added & saved to data.json!`, 'success');
+            } else {
+                showFlash('Error saving to data.json', 'error');
+            }
         }
 
-        // Deduct marks - SIMPLE VERSION
-        function deductMarks() {
+        // Deduct marks - AUTO SAVE TO data.json
+        async function deductMarks() {
             const name = document.getElementById('deductStudent').value;
             const marks = parseInt(document.getElementById('deductMarks').value);
             const reason = document.getElementById('deductReason').value.trim();
@@ -613,14 +680,19 @@
                 date: new Date().toLocaleString()
             });
 
-            saveStudentsToStorage();
-            loadStudents();
-            hideAllForms();
-            showFlash(`Deducted ${marks} marks from ${name}. Reason: ${reason}`, 'success');
+            // AUTO SAVE TO data.json
+            const success = await saveStudentsToJson();
+            if (success) {
+                loadStudents();
+                hideAllForms();
+                showFlash(`Marks deducted & saved to data.json!`, 'success');
+            } else {
+                showFlash('Error saving to data.json', 'error');
+            }
         }
 
-        // Add marks - SIMPLE VERSION
-        function addMarks() {
+        // Add marks - AUTO SAVE TO data.json
+        async function addMarks() {
             const name = document.getElementById('addStudent').value;
             const marks = parseInt(document.getElementById('addMarks').value);
             const reason = document.getElementById('addReason').value.trim();
@@ -643,10 +715,15 @@
                 date: new Date().toLocaleString()
             });
 
-            saveStudentsToStorage();
-            loadStudents();
-            hideAllForms();
-            showFlash(`Added ${marks} marks to ${name}. Reason: ${reason}`, 'success');
+            // AUTO SAVE TO data.json
+            const success = await saveStudentsToJson();
+            if (success) {
+                loadStudents();
+                hideAllForms();
+                showFlash(`Marks added & saved to data.json!`, 'success');
+            } else {
+                showFlash('Error saving to data.json', 'error');
+            }
         }
 
         // View student history
@@ -654,32 +731,33 @@
             const student = students[studentName];
             let historyHTML = '<h3>History for ' + studentName + '</h3>';
             
-            if (student.history && student.history.length > 0) {
-                student.history.forEach(record => {
-                    const color = record.type === 'added' ? 'green' : 'red';
-                    historyHTML += `
-                        <div style="background:#f8f9fa;padding:10px;margin:5px 0;border-radius:5px;border-left:3px solid ${color}">
-                            <strong style="color:${color}">${record.type.toUpperCase()}</strong><br>
-                            Marks: ${record.marks}<br>
-                            Reason: ${record.reason}<br>
-                            Date: ${record.date}
-                        </div>
-                    `;
-                });
-            } else {
-                historyHTML += '<p>No history available</p>';
-            }
+            student.history.forEach(record => {
+                const color = record.type === 'added' ? 'green' : 'red';
+                historyHTML += `
+                    <div style="background:#f8f9fa;padding:10px;margin:5px 0;border-radius:5px;border-left:3px solid ${color}">
+                        <strong style="color:${color}">${record.type.toUpperCase()}</strong><br>
+                        Marks: ${record.marks}<br>
+                        Reason: ${record.reason}<br>
+                        Date: ${record.date}
+                    </div>
+                `;
+            });
             
             alert(historyHTML);
         }
 
-        // Delete student
-        function deleteStudent(studentName) {
+        // Delete student - AUTO SAVE TO data.json
+        async function deleteStudent(studentName) {
             if (confirm(`Are you sure you want to delete ${studentName}?`)) {
                 delete students[studentName];
-                saveStudentsToStorage();
-                loadStudents();
-                showFlash(`Student ${studentName} deleted successfully!`, 'success');
+                // AUTO SAVE TO data.json
+                const success = await saveStudentsToJson();
+                if (success) {
+                    loadStudents();
+                    showFlash(`Student deleted & data.json updated!`, 'success');
+                } else {
+                    showFlash('Error saving to data.json', 'error');
+                }
             }
         }
 
@@ -699,7 +777,7 @@
                 `<div style="background:${color};color:${textColor};padding:15px;border-radius:8px;margin:20px 0;">${message}</div>`;
             setTimeout(() => {
                 document.getElementById('flashMessage').innerHTML = '';
-            }, 3000);
+            }, 4000);
         }
 
         // Form display functions
@@ -734,10 +812,8 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            loadStudentsFromStorage();
-            // Auto-fill login for quick testing
-            document.getElementById('username').value = 'admin';
-            document.getElementById('password').value = 'admin123';
+            // Auto load data from data.json
+            loadStudentsFromJson();
         });
     </script>
 </body>

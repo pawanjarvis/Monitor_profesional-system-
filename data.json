@@ -1,0 +1,14 @@
+{
+  "students": {
+    "Rahul Sharma": {
+      "marks": 95,
+      "history": []
+    },
+    "Priya Patel": {
+      "marks": 88, 
+      "history": []
+    }
+  },
+  "lastUpdated": "2024-12-01T10:30:00.000Z",
+  "totalStudents": 2
+}
