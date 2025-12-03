@@ -276,6 +276,41 @@
             font-weight: 500;
         }
 
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            border-top: 4px solid #3f51b5;
+        }
+
+        .stat-card i {
+            font-size: 30px;
+            color: #3f51b5;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a237e;
+            margin: 10px 0;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 14px;
+        }
+
         /* Search Bar */
         .search-container {
             margin-bottom: 35px;
@@ -445,8 +480,8 @@
             color: white;
         }
 
-        .status-good {
-            background: linear-gradient(135deg, #2196F3, #0D47A1);
+        .status-perfect {
+            background: linear-gradient(135deg, #9C27B0, #7B1FA2);
             color: white;
         }
 
@@ -461,6 +496,8 @@
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
         }
 
         .students-table {
@@ -470,6 +507,8 @@
 
         .students-table thead {
             background: linear-gradient(135deg, #3f51b5, #283593);
+            position: sticky;
+            top: 0;
         }
 
         .students-table th {
@@ -599,6 +638,25 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        /* Scrollbar Styling */
+        .students-table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .students-table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .students-table-container::-webkit-scrollbar-thumb {
+            background: #3f51b5;
+            border-radius: 4px;
+        }
+
+        .students-table-container::-webkit-scrollbar-thumb:hover {
+            background: #283593;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -671,7 +729,31 @@
                 <!-- Welcome Message -->
                 <div class="welcome-message">
                     <i class="fas fa-info-circle"></i>
-                    <p>Welcome <span id="studentName">Student</span>! Data loaded from data.json file</p>
+                    <p>Welcome <span id="studentName">Best Student</span>! All students have 100/100 marks</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <div class="number" id="totalStudents">25</div>
+                        <div class="label">Total Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line"></i>
+                        <div class="number" id="avgMarks">100%</div>
+                        <div class="label">Average Marks</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-trophy"></i>
+                        <div class="number" id="topScore">100</div>
+                        <div class="label">Top Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-medal"></i>
+                        <div class="number" id="perfectCount">25</div>
+                        <div class="label">Perfect Scores</div>
+                    </div>
                 </div>
 
                 <!-- Search Bar -->
@@ -700,7 +782,7 @@
                 <div class="all-students-section">
                     <h3 class="section-title">
                         <i class="fas fa-list"></i>
-                        All Students
+                        All Students (All have 100 marks)
                     </h3>
                     
                     <div class="students-table-container">
@@ -730,55 +812,151 @@
             password: "student123"
         };
 
-        // Sample students data
+        // Updated students data with ALL STUDENTS at 100 marks
         let students = [
             {
-                name: "Rahul Sharma",
-                marks: 95,
-                status: "Golden",
+                name: "Afjal Ali",
+                marks: 100,
+                status: "Perfect",
                 rank: 1
             },
             {
-                name: "Priya Patel",
-                marks: 88,
-                status: "Excellent",
+                name: "Deepak Sahani",
+                marks: 100,
+                status: "Perfect",
                 rank: 2
             },
             {
-                name: "Amit Kumar",
-                marks: 82,
-                status: "Excellent",
+                name: "Vivek Yadav",
+                marks: 100,
+                status: "Perfect",
                 rank: 3
             },
             {
-                name: "Sneha Singh",
-                marks: 78,
-                status: "Good",
+                name: "Sai Nath Jaiswal",
+                marks: 100,
+                status: "Perfect",
                 rank: 4
             },
             {
-                name: "Rohan Verma",
-                marks: 75,
-                status: "Good",
+                name: "Shaurya Gupta",
+                marks: 100,
+                status: "Perfect",
                 rank: 5
             },
             {
-                name: "Neha Gupta",
-                marks: 68,
-                status: "Average",
+                name: "Tejas",
+                marks: 100,
+                status: "Perfect",
                 rank: 6
             },
             {
-                name: "Vikram Yadav",
-                marks: 65,
-                status: "Average",
+                name: "Krishna",
+                marks: 100,
+                status: "Perfect",
                 rank: 7
             },
             {
-                name: "Pooja Sharma",
-                marks: 58,
-                status: "Needs Improvement",
+                name: "Vinyak Rungta",
+                marks: 100,
+                status: "Perfect",
                 rank: 8
+            },
+            {
+                name: "Aryan Dubey",
+                marks: 100,
+                status: "Perfect",
+                rank: 9
+            },
+            {
+                name: "Anup Vishwakarma",
+                marks: 100,
+                status: "Perfect",
+                rank: 10
+            },
+            {
+                name: "Aryan Kumar Singh",
+                marks: 100,
+                status: "Perfect",
+                rank: 11
+            },
+            {
+                name: "Vidyasagar Kushwaha",
+                marks: 100,
+                status: "Perfect",
+                rank: 12
+            },
+            {
+                name: "Jishan Ali",
+                marks: 100,
+                status: "Perfect",
+                rank: 13
+            },
+            {
+                name: "Arsh Ali",
+                marks: 100,
+                status: "Perfect",
+                rank: 14
+            },
+            {
+                name: "Anupam Prajapati",
+                marks: 100,
+                status: "Perfect",
+                rank: 15
+            },
+            {
+                name: "Kanishk Jaiswal",
+                marks: 100,
+                status: "Perfect",
+                rank: 16
+            },
+            {
+                name: "Aarav Pal",
+                marks: 100,
+                status: "Perfect",
+                rank: 17
+            },
+            {
+                name: "Sajid Ali",
+                marks: 100,
+                status: "Perfect",
+                rank: 18
+            },
+            {
+                name: "Roy Maddheshiya",
+                marks: 100,
+                status: "Perfect",
+                rank: 19
+            },
+            {
+                name: "Hitesh Saini",
+                marks: 100,
+                status: "Perfect",
+                rank: 20
+            },
+            {
+                name: "Nitesh Gond",
+                marks: 100,
+                status: "Perfect",
+                rank: 21
+            },
+            {
+                name: "Subham Yadav",
+                marks: 100,
+                status: "Perfect",
+                rank: 22
+            },
+            {
+                name: "Aryan Sharma",
+                marks: 100,
+                status: "Perfect",
+                rank: 23
+            },
+            {
+                name: "Rajveer Yadav",
+                marks: 100,
+                status: "Perfect",
+                rank: 24
             }
         ];
 
@@ -795,9 +973,6 @@
 
             if (username === LOGIN_CREDENTIALS.username && password === LOGIN_CREDENTIALS.password) {
                 showMessage('Login successful! Loading dashboard...', 'success');
-                
-                // Update student name in welcome message
-                document.getElementById('studentName').textContent = "Best Student";
                 
                 // Show dashboard after delay
                 setTimeout(() => {
@@ -823,22 +998,38 @@
 
         // Load dashboard data
         function loadDashboardData() {
+            // Calculate stats
+            updateStats();
+            
             loadTopStudents();
             loadAllStudents();
             
-            // Simulate data loading animation
-            setTimeout(() => {
-                // Update welcome message after "loading"
-                document.querySelector('.welcome-message p').innerHTML = 
-                    'Welcome Best Student! - Data loaded from data.json file ✅';
-            }, 1000);
+            // Update welcome message
+            document.querySelector('.welcome-message p').innerHTML = 
+                'Welcome Best Student! - All students have 100/100 marks ✅';
+        }
+
+        // Update statistics
+        function updateStats() {
+            // Calculate total students
+            document.getElementById('totalStudents').textContent = students.length;
+            
+            // Calculate average marks (all are 100)
+            document.getElementById('avgMarks').textContent = `100%`;
+            
+            // Calculate top score (all are 100)
+            document.getElementById('topScore').textContent = 100;
+            
+            // Count perfect students (marks = 100)
+            const perfectCount = students.filter(s => s.marks === 100).length;
+            document.getElementById('perfectCount').textContent = perfectCount;
         }
 
         // Load top 3 students
         function loadTopStudents() {
             const container = document.getElementById('topStudentsContainer');
             
-            // Sort by marks and get top 3
+            // Sort by marks and get top 3 (all have 100 marks)
             const topStudents = [...students]
                 .sort((a, b) => b.marks - a.marks)
                 .slice(0, 3);
@@ -853,7 +1044,7 @@
                     <div class="student-info">
                         <div class="info-row">
                             <span class="info-label">Marks:</span>
-                            <span class="marks-badge">${student.marks}</span>
+                            <span class="marks-badge">${student.marks}/100</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">Status:</span>
@@ -874,8 +1065,19 @@
         function loadAllStudents() {
             const tableBody = document.getElementById('studentsTableBody');
             
-            // Sort by marks
-            const sortedStudents = [...students].sort((a, b) => b.marks - a.marks);
+            // Sort by marks (all are 100)
+            const sortedStudents = [...students].sort((a, b) => {
+                // If marks are equal, sort by name
+                if (b.marks === a.marks) {
+                    return a.name.localeCompare(b.name);
+                }
+                return b.marks - a.marks;
+            });
+            
+            // Update ranks based on sorted order
+            sortedStudents.forEach((student, index) => {
+                student.rank = index + 1;
+            });
             
             tableBody.innerHTML = sortedStudents.map(student => `
                 <tr>
@@ -883,15 +1085,35 @@
                         <i class="fas fa-user"></i>
                         ${student.name}
                     </td>
-                    <td class="marks-cell">${student.marks}</td>
+                    <td class="marks-cell">${student.marks}/100</td>
                     <td class="status-cell">
-                        <span class="status-badge ${getStatusClass(student.status)}">
-                            ${student.status}
+                        <span class="status-badge ${getStatusClass(getStatusFromMarks(student.marks))}">
+                            ${getStatusFromMarks(student.marks)}
                         </span>
                     </td>
                     <td class="rank-cell">${student.rank}</td>
                 </tr>
             `).join('');
+        }
+
+        // Get status based on marks
+        function getStatusFromMarks(marks) {
+            if (marks === 100) return "Perfect";
+            if (marks >= 95) return "Golden";
+            if (marks >= 85) return "Excellent";
+            if (marks >= 75) return "Good";
+            return "Average";
+        }
+
+        // Get CSS class for status
+        function getStatusClass(status) {
+            switch(status.toLowerCase()) {
+                case 'perfect': return 'status-perfect';
+                case 'golden': return 'status-golden';
+                case 'excellent': return 'status-excellent';
+                case 'good': return 'status-good';
+                default: return 'status-average';
+            }
         }
 
         // Search students function
@@ -923,22 +1145,27 @@
                 return;
             }
             
-            // Sort filtered results by marks
-            const sortedFiltered = filteredStudents.sort((a, b) => b.marks - a.marks);
+            // Sort filtered results by marks (then by name)
+            const sortedFiltered = filteredStudents.sort((a, b) => {
+                if (b.marks === a.marks) {
+                    return a.name.localeCompare(b.name);
+                }
+                return b.marks - a.marks;
+            });
             
-            tableBody.innerHTML = sortedFiltered.map(student => `
+            tableBody.innerHTML = sortedFiltered.map((student, index) => `
                 <tr>
                     <td class="student-name-cell">
                         <i class="fas fa-user"></i>
                         ${student.name}
                     </td>
-                    <td class="marks-cell">${student.marks}</td>
+                    <td class="marks-cell">${student.marks}/100</td>
                     <td class="status-cell">
-                        <span class="status-badge ${getStatusClass(student.status)}">
-                            ${student.status}
+                        <span class="status-badge ${getStatusClass(getStatusFromMarks(student.marks))}">
+                            ${getStatusFromMarks(student.marks)}
                         </span>
                     </td>
-                    <td class="rank-cell">${student.rank}</td>
+                    <td class="rank-cell">${index + 1}</td>
                 </tr>
             `).join('');
         }
@@ -948,16 +1175,6 @@
             document.getElementById('searchInput').value = '';
             loadAllStudents();
             loadTopStudents();
-        }
-
-        // Get CSS class for status
-        function getStatusClass(status) {
-            switch(status.toLowerCase()) {
-                case 'golden': return 'status-golden';
-                case 'excellent': return 'status-excellent';
-                case 'good': return 'status-good';
-                default: return '';
-            }
         }
 
         // Logout function
@@ -999,6 +1216,42 @@
                 simulateAutoSave();
             }
         }, 30000);
+
+        // Function to deduct marks from a student
+        function deductMarks(studentName, marksToDeduct, reason) {
+            const student = students.find(s => s.name === studentName);
+            if (student) {
+                student.marks = Math.max(0, student.marks - marksToDeduct);
+                student.status = getStatusFromMarks(student.marks);
+                
+                // Update display
+                updateStats();
+                loadTopStudents();
+                loadAllStudents();
+                
+                console.log(`Deducted ${marksToDeduct} marks from ${studentName} for: ${reason}`);
+                return true;
+            }
+            return false;
+        }
+
+        // Function to add marks to a student
+        function addMarks(studentName, marksToAdd, reason) {
+            const student = students.find(s => s.name === studentName);
+            if (student) {
+                student.marks = Math.min(100, student.marks + marksToAdd);
+                student.status = getStatusFromMarks(student.marks);
+                
+                // Update display
+                updateStats();
+                loadTopStudents();
+                loadAllStudents();
+                
+                console.log(`Added ${marksToAdd} marks to ${studentName} for: ${reason}`);
+                return true;
+            }
+            return false;
+        }
     </script>
 </body>
 </html>
