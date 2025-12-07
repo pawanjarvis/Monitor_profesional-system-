@@ -632,7 +632,7 @@
             border-radius: 20px;
             padding: 30px;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
 
@@ -825,22 +825,49 @@
             font-size: 13px;
         }
 
-        /* Task Selection Modal */
-        .task-selection-modal {
-            max-width: 600px;
+        /* Task History Table */
+        .history-table-container {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
         }
 
-        .option-select {
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+        .history-table {
             width: 100%;
-            margin-bottom: 15px;
+            border-collapse: collapse;
         }
 
-        .option-select:focus {
-            outline: none;
-            border-color: #3f51b5;
+        .history-table thead {
+            background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+            position: sticky;
+            top: 0;
+        }
+
+        .history-table th {
+            padding: 20px;
+            text-align: left;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .history-table tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s;
+        }
+
+        .history-table tbody tr:hover {
+            background: #f8f9ff;
+        }
+
+        .history-table td {
+            padding: 18px 20px;
+            color: #333;
+            font-size: 16px;
         }
 
         /* Responsive Design */
@@ -990,6 +1017,9 @@
                     <button class="tab-btn" onclick="switchTab('tasks')">
                         <i class="fas fa-tasks"></i> Tasks
                     </button>
+                    <button class="tab-btn" onclick="switchTab('taskHistory')">
+                        <i class="fas fa-history"></i> Task History
+                    </button>
                     <button class="tab-btn" onclick="switchTab('analytics')">
                         <i class="fas fa-chart-bar"></i> Analytics
                     </button>
@@ -1102,6 +1132,54 @@
                     </div>
                 </div>
 
+                <!-- Task History Tab -->
+                <div class="tab-content" id="taskHistoryTab">
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <i class="fas fa-history"></i>
+                            <div class="number" id="totalCompletions">0</div>
+                            <div class="label">Total Completions</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-user-check"></i>
+                            <div class="number" id="activeStudentsHistory">0</div>
+                            <div class="label">Active Students</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-star"></i>
+                            <div class="number" id="totalPointsHistory">0</div>
+                            <div class="label">Total Points Given</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-calendar"></i>
+                            <div class="number" id="todayCompletions">0</div>
+                            <div class="label">Today's Completions</div>
+                        </div>
+                    </div>
+
+                    <!-- Task History Table -->
+                    <div class="tasks-section">
+                        <h3 class="section-title"><i class="fas fa-history"></i> Task Completion History</h3>
+                        <div class="history-table-container">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Task</th>
+                                        <th>Student</th>
+                                        <th>Points</th>
+                                        <th>Completed By</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="taskHistoryBody">
+                                    <!-- Task history will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Analytics Tab -->
                 <div class="tab-content" id="analyticsTab">
                     <div class="stats-container">
@@ -1162,7 +1240,7 @@
                 <!-- Welcome Message -->
                 <div class="welcome-message">
                     <i class="fas fa-info-circle"></i>
-                    <p>Welcome <span id="studentName">Student</span>! Complete tasks to earn points</p>
+                    <p>Welcome <span id="studentName">Student</span>! View your assigned tasks</p>
                 </div>
 
                 <!-- Stats -->
@@ -1353,31 +1431,33 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Task Options (Optional)</label>
+                    <label>Due Date</label>
                     <div class="input-with-icon">
-                        <i class="fas fa-list"></i>
-                        <input type="text" id="taskOptions" placeholder="Option1|Option2|Option3 (separate with |)">
+                        <i class="fas fa-calendar"></i>
+                        <input type="date" id="taskDueDate">
                     </div>
                 </div>
             </div>
             <div class="form-group">
-                <label>
-                    <input type="checkbox" id="multipleStudents" onchange="toggleMultipleStudents()">
-                    Assign to Multiple Specific Students
-                </label>
-            </div>
-            <div class="form-group">
-                <label>Assigned To</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-users"></i>
-                    <select id="taskAssignedTo">
-                        <option value="all">All Students</option>
-                        <!-- Student options will be loaded dynamically -->
-                    </select>
+                <label>Assign to:</label>
+                <div style="margin-top: 10px;">
+                    <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <input type="radio" name="assignType" value="all" checked onchange="toggleStudentSelection()">
+                        <span>All Students</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="radio" name="assignType" value="specific" onchange="toggleStudentSelection()">
+                        <span>Specific Students</span>
+                    </label>
                 </div>
-                <small id="selectedStudentsInfo" style="display: none; color: #666; margin-top: 5px;">
-                    Hold Ctrl to select multiple students
-                </small>
+            </div>
+            <div class="form-group" id="studentSelectionGroup" style="display: none;">
+                <label>Select Students</label>
+                <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 10px;">
+                    <div id="studentCheckboxes">
+                        <!-- Student checkboxes will be loaded here -->
+                    </div>
+                </div>
             </div>
             <div class="modal-actions">
                 <button class="modal-btn secondary" onclick="closeModal('addTaskModal')">Cancel</button>
@@ -1386,26 +1466,36 @@
         </div>
     </div>
 
-    <!-- Task Selection Modal (for students when task has options) -->
-    <div class="modal" id="taskSelectionModal">
-        <div class="modal-content task-selection-modal">
+    <!-- Mark Task Complete Modal -->
+    <div class="modal" id="markTaskCompleteModal">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-tasks"></i> Select Task Option</h3>
-                <button class="close-btn" onclick="closeModal('taskSelectionModal')">×</button>
+                <h3><i class="fas fa-check-circle"></i> Mark Task as Complete</h3>
+                <button class="close-btn" onclick="closeModal('markTaskCompleteModal')">×</button>
             </div>
             <div class="form-group">
-                <h4 id="selectedTaskTitle"></h4>
-                <p id="selectedTaskDescription"></p>
+                <h4 id="taskToCompleteTitle"></h4>
+                <p id="taskToCompleteDescription"></p>
+                <p><strong>Points: </strong><span id="taskToCompletePoints"></span></p>
             </div>
             <div class="form-group">
-                <label>Choose an option to complete:</label>
-                <select class="option-select" id="taskOptionSelect">
-                    <!-- Options will be loaded dynamically -->
-                </select>
+                <label>Select Students who completed this task:</label>
+                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-top: 10px;">
+                    <div id="taskCompleteCheckboxes">
+                        <!-- Student checkboxes will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Completion Date</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-calendar"></i>
+                    <input type="date" id="completionDate" value="${new Date().toISOString().split('T')[0]}">
+                </div>
             </div>
             <div class="modal-actions">
-                <button class="modal-btn secondary" onclick="closeModal('taskSelectionModal')">Cancel</button>
-                <button class="modal-btn primary" onclick="completeSelectedTaskOption()">Complete Selected Option</button>
+                <button class="modal-btn secondary" onclick="closeModal('markTaskCompleteModal')">Cancel</button>
+                <button class="modal-btn primary" onclick="markTaskAsComplete()">Mark as Complete</button>
             </div>
         </div>
     </div>
@@ -1422,59 +1512,60 @@
 
         // Students Data (25 students with 100 base marks as requested)
         let students = [
-            { name: "Afjal Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Deepak Sahani", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Vivek Yadav", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Sai Nath Jaiswal", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Shaurya Gupta", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Tejas", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Krishna", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Vinyak Rungta", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Aryan Dubey", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Anup Vishwakarma", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Aryan Kumar Singh", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Vidyasagar Kushwaha", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Jishan Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Arsh Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Anupam Prajapati", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Kanishk Jaiswal", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Aarav Pal", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Sajid Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Roy Maddheshiya", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Hitesh Saini", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Nitesh Gond", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Subham Yadav", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Aryan Sharma", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
-            { name: "Rajveer Yadav", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} }
+            { name: "Afjal Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Deepak Sahani", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Vivek Yadav", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Sai Nath Jaiswal", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Shaurya Gupta", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Tejas", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Krishna", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Vinyak Rungta", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Aryan Dubey", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Anup Vishwakarma", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Aryan Kumar Singh", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Vidyasagar Kushwaha", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Jishan Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Arsh Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Anupam Prajapati", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Kanishk Jaiswal", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Aarav Pal", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Sajid Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Roy Maddheshiya", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Hitesh Saini", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Nitesh Gond", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Subham Yadav", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Aryan Sharma", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 },
+            { name: "Rajveer Yadav", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0 }
         ];
 
-        // Tasks Data - Updated structure for multiple students and options
+        // Tasks Data
         let tasks = [
             {
                 id: 1,
-                title: "Complete Assignment (Choose One)",
-                description: "Complete one of the following assignments",
-                points: 20,
-                assignedTo: ["all"], // Array of student names or ["all"]
+                title: "Complete Maths Assignment",
+                description: "Solve all problems from Chapter 5",
+                points: 10,
+                assignedTo: "all", // "all" or array of student names
                 createdBy: "admin",
                 createdAt: new Date().toISOString(),
-                completedBy: [], // Array of objects: {studentName, selectedOption}
-                isCompleted: false,
-                taskOptions: ["Maths Assignment", "Science Project", "English Essay"] // Multiple options
+                dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                completions: [] // Array of completion records
             },
             {
                 id: 2,
-                title: "Group Activity",
-                description: "Participate in group activity with selected students",
+                title: "Science Project Submission",
+                description: "Submit project on renewable energy",
                 points: 15,
-                assignedTo: ["Afjal Ali", "Deepak Sahani", "Vivek Yadav"], // Specific students
+                assignedTo: "all",
                 createdBy: "admin",
                 createdAt: new Date().toISOString(),
-                completedBy: [],
-                isCompleted: false,
-                taskOptions: [] // No options - single task
+                dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                completions: []
             }
         ];
+
+        // Task History Data
+        let taskHistory = [];
 
         // Current user and selected task for editing
         let currentUser = null;
@@ -1551,25 +1642,11 @@
             } else if (tabName === 'tasks') {
                 loadTasks();
                 updateTaskStats();
+            } else if (tabName === 'taskHistory') {
+                loadTaskHistory();
+                updateTaskHistoryStats();
             } else if (tabName === 'analytics') {
                 loadAnalytics();
-            }
-        }
-
-        // Toggle multiple students selection
-        function toggleMultipleStudents() {
-            const multipleCheckbox = document.getElementById('multipleStudents');
-            const assignedToSelect = document.getElementById('taskAssignedTo');
-            const infoText = document.getElementById('selectedStudentsInfo');
-            
-            if (multipleCheckbox.checked) {
-                assignedToSelect.multiple = true;
-                assignedToSelect.size = 5;
-                infoText.style.display = 'block';
-            } else {
-                assignedToSelect.multiple = false;
-                assignedToSelect.size = 1;
-                infoText.style.display = 'none';
             }
         }
 
@@ -1577,9 +1654,11 @@
         function loadAdminDashboard() {
             loadStudentsTable();
             loadTasks();
+            loadTaskHistory();
             populateStudentSelects();
             updateAdminStats();
             updateTaskStats();
+            updateTaskHistoryStats();
         }
 
         // Load student dashboard
@@ -1643,45 +1722,36 @@
             }
 
             tasks.forEach(task => {
-                const assignedStudents = task.assignedTo[0] === 'all' ? students.length : task.assignedTo.length;
-                const completedCount = task.completedBy.length;
+                // Count completions for this task
+                const completionCount = task.completions.length;
+                const assignedStudents = task.assignedTo === 'all' ? students.length : task.assignedTo.length;
                 
-                // Get assigned students names
-                let assignedToText = '';
-                if (task.assignedTo[0] === 'all') {
-                    assignedToText = 'All Students';
-                } else if (task.assignedTo.length <= 3) {
-                    assignedToText = task.assignedTo.join(', ');
-                } else {
-                    assignedToText = `${task.assignedTo.length} students`;
-                }
+                // Format due date
+                const dueDate = new Date(task.dueDate);
+                const today = new Date();
+                const isOverdue = dueDate < today && completionCount < assignedStudents;
                 
                 tasksList.innerHTML += `
-                    <div class="task-item ${task.isCompleted ? 'completed' : ''}">
+                    <div class="task-item ${completionCount === assignedStudents ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}">
                         <div class="task-info">
                             <div class="task-title">
                                 ${task.title}
                                 <span class="task-points">${task.points} Points</span>
                             </div>
                             <div class="task-desc">${task.description}</div>
-                            ${task.taskOptions && task.taskOptions.length > 0 ? `
-                                <div class="task-options">
-                                    <div class="task-options-title">
-                                        <i class="fas fa-list-check"></i> Options:
-                                    </div>
-                                    ${task.taskOptions.map(option => `
-                                        <div class="option-item">• ${option}</div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
                             <div class="task-meta">
                                 <div>
                                     <i class="fas fa-users"></i>
-                                    Assigned: ${assignedToText}
+                                    Assigned: ${task.assignedTo === 'all' ? 'All Students' : task.assignedTo.length + ' students'}
                                 </div>
                                 <div>
                                     <i class="fas fa-check"></i>
-                                    Completed: ${completedCount}/${assignedStudents}
+                                    Completed: ${completionCount}/${assignedStudents}
+                                </div>
+                                <div>
+                                    <i class="fas fa-calendar"></i>
+                                    Due: ${formatDate(task.dueDate)}
+                                    ${isOverdue ? '<span style="color: #f44336; margin-left: 5px;">(Overdue)</span>' : ''}
                                 </div>
                                 <div>
                                     <i class="fas fa-clock"></i>
@@ -1690,6 +1760,10 @@
                             </div>
                         </div>
                         <div class="task-actions">
+                            <button class="task-btn complete-btn" onclick="showMarkTaskCompleteModal(${task.id})">
+                                <i class="fas fa-check"></i>
+                                Mark Complete
+                            </button>
                             <button class="task-btn delete-btn" onclick="deleteTask(${task.id})">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
@@ -1699,15 +1773,18 @@
             });
         }
 
-        // Load tasks for student
+        // Load tasks for student (READ ONLY)
         function loadMyTasks() {
             const myTasksList = document.getElementById('myTasksList');
             myTasksList.innerHTML = '';
 
             if (!currentStudent) return;
 
+            // Get tasks assigned to this student
             const myTasks = tasks.filter(task => {
-                return task.assignedTo[0] === 'all' || task.assignedTo.includes(currentStudent.name);
+                if (task.assignedTo === 'all') return true;
+                if (Array.isArray(task.assignedTo) && task.assignedTo.includes(currentStudent.name)) return true;
+                return false;
             });
 
             if (myTasks.length === 0) {
@@ -1721,31 +1798,23 @@
             }
 
             myTasks.forEach(task => {
-                const isCompleted = task.completedBy.some(completion => 
-                    completion.studentName === currentStudent.name
-                );
-                const completedByStudent = task.completedBy.find(completion => 
-                    completion.studentName === currentStudent.name
-                );
+                // Check if this student has completed this task
+                const studentCompletion = task.completions.find(comp => comp.studentName === currentStudent.name);
+                const isCompleted = !!studentCompletion;
+                
+                // Format due date
+                const dueDate = new Date(task.dueDate);
+                const today = new Date();
+                const isOverdue = dueDate < today && !isCompleted;
                 
                 myTasksList.innerHTML += `
-                    <div class="task-item ${isCompleted ? 'completed' : ''}">
+                    <div class="task-item ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}">
                         <div class="task-info">
                             <div class="task-title">
                                 ${task.title}
                                 <span class="task-points">${task.points} Points</span>
                             </div>
                             <div class="task-desc">${task.description}</div>
-                            ${task.taskOptions && task.taskOptions.length > 0 ? `
-                                <div class="task-options">
-                                    <div class="task-options-title">
-                                        <i class="fas fa-list-check"></i> Options (Choose One):
-                                    </div>
-                                    ${task.taskOptions.map(option => `
-                                        <div class="option-item">• ${option}</div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
                             <div class="task-meta">
                                 <div>
                                     <i class="fas fa-star"></i>
@@ -1754,106 +1823,18 @@
                                 <div>
                                     <i class="fas fa-check"></i>
                                     Status: ${isCompleted ? 'Completed' : 'Pending'}
+                                    ${isCompleted ? ` (${formatDate(studentCompletion.completedAt)})` : ''}
                                 </div>
-                                ${isCompleted && completedByStudent ? `
-                                    <div>
-                                        <i class="fas fa-check-double"></i>
-                                        Option: ${completedByStudent.selectedOption}
-                                    </div>
-                                ` : ''}
+                                <div>
+                                    <i class="fas fa-calendar"></i>
+                                    Due: ${formatDate(task.dueDate)}
+                                    ${isOverdue ? '<span style="color: #f44336; margin-left: 5px;">(Overdue)</span>' : ''}
+                                </div>
                             </div>
-                        </div>
-                        <div class="task-actions">
-                            <button class="task-btn complete-btn ${isCompleted ? 'completed' : ''}" 
-                                    onclick="${task.taskOptions && task.taskOptions.length > 0 ? `showTaskOptions(${task.id})` : `completeTaskAsStudent(${task.id})`}" 
-                                    ${isCompleted ? 'disabled' : ''}>
-                                <i class="fas fa-check"></i>
-                                ${isCompleted ? 'Completed' : task.taskOptions && task.taskOptions.length > 0 ? 'Select Option' : 'Complete Task'}
-                            </button>
                         </div>
                     </div>
                 `;
             });
-        }
-
-        // Show task options modal for student
-        function showTaskOptions(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (!task || !currentStudent) return;
-
-            // Check if already completed
-            if (task.completedBy.some(completion => completion.studentName === currentStudent.name)) {
-                showMessage('You have already completed this task!', 'error');
-                return;
-            }
-
-            selectedTaskId = taskId;
-            document.getElementById('selectedTaskTitle').textContent = task.title;
-            document.getElementById('selectedTaskDescription').textContent = task.description;
-            
-            const optionSelect = document.getElementById('taskOptionSelect');
-            optionSelect.innerHTML = '<option value="">Select an option</option>';
-            
-            task.taskOptions.forEach(option => {
-                optionSelect.innerHTML += `<option value="${option}">${option}</option>`;
-            });
-            
-            document.getElementById('taskSelectionModal').style.display = 'flex';
-        }
-
-        // Complete selected task option
-        function completeSelectedTaskOption() {
-            const optionSelect = document.getElementById('taskOptionSelect');
-            const selectedOption = optionSelect.value;
-            
-            if (!selectedOption) {
-                showMessage('Please select an option!', 'error');
-                return;
-            }
-            
-            const task = tasks.find(t => t.id === selectedTaskId);
-            if (!task || !currentStudent) return;
-            
-            // Mark as completed for this student with selected option
-            task.completedBy.push({
-                studentName: currentStudent.name,
-                selectedOption: selectedOption,
-                completedAt: new Date().toISOString()
-            });
-            
-            // Update student points
-            currentStudent.taskPoints += task.points;
-            currentStudent.completedTasks.push(selectedTaskId);
-            
-            // Store which option was completed
-            if (!currentStudent.taskOptionsCompleted[selectedTaskId]) {
-                currentStudent.taskOptionsCompleted[selectedTaskId] = [];
-            }
-            currentStudent.taskOptionsCompleted[selectedTaskId].push(selectedOption);
-            
-            // Check if all assigned students have completed the task
-            if (task.assignedTo[0] === 'all') {
-                task.isCompleted = task.completedBy.length === students.length;
-            } else {
-                const allAssignedCompleted = task.assignedTo.every(studentName => 
-                    task.completedBy.some(completion => completion.studentName === studentName)
-                );
-                task.isCompleted = allAssignedCompleted;
-            }
-
-            // Update points display with animation
-            const pointsElement = document.getElementById('studentTotalPoints');
-            pointsElement.textContent = currentStudent.taskPoints;
-            pointsElement.classList.add('points-added');
-            setTimeout(() => pointsElement.classList.remove('points-added'), 500);
-
-            closeModal('taskSelectionModal');
-            loadMyTasks();
-            loadStudentTable();
-            loadTopStudents();
-            updateStudentStats();
-            updateTaskStats();
-            showMessage(`Task completed! You earned ${task.points} points for "${selectedOption}"!`, 'success');
         }
 
         // Load student table for student view
@@ -1914,6 +1895,53 @@
             }).join('');
         }
 
+        // Load task history
+        function loadTaskHistory() {
+            const historyBody = document.getElementById('taskHistoryBody');
+            
+            // Get all completions from all tasks
+            let allCompletions = [];
+            tasks.forEach(task => {
+                task.completions.forEach(completion => {
+                    allCompletions.push({
+                        ...completion,
+                        taskTitle: task.title,
+                        taskPoints: task.points
+                    });
+                });
+            });
+            
+            // Sort by completion date (newest first)
+            allCompletions.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+            
+            if (allCompletions.length === 0) {
+                historyBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #666;">
+                            <i class="fas fa-history" style="font-size: 48px; margin-bottom: 15px; color: #ddd;"></i>
+                            <p>No task completion history yet.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            historyBody.innerHTML = allCompletions.map(completion => {
+                return `
+                    <tr>
+                        <td>${formatDateTime(completion.completedAt)}</td>
+                        <td><strong>${completion.taskTitle}</strong></td>
+                        <td>${completion.studentName}</td>
+                        <td style="color: #4CAF50; font-weight: bold;">+${completion.taskPoints}</td>
+                        <td>${completion.markedBy || 'Admin'}</td>
+                        <td>
+                            <span class="status-badge status-excellent">Completed</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
         // Get status from total marks
         function getStatus(totalMarks) {
             if (totalMarks >= 190) return { text: 'Perfect', class: 'status-perfect' };
@@ -1939,14 +1967,44 @@
         // Update task statistics
         function updateTaskStats() {
             const totalTasks = tasks.length;
-            const completedTasks = tasks.filter(t => t.isCompleted).length;
-            const totalPoints = tasks.reduce((sum, task) => sum + (task.points * task.completedBy.length), 0);
+            const completedTasks = tasks.filter(task => {
+                const assignedStudents = task.assignedTo === 'all' ? students.length : task.assignedTo.length;
+                return task.completions.length === assignedStudents;
+            }).length;
+            const totalPoints = tasks.reduce((sum, task) => sum + (task.points * task.completions.length), 0);
             const pendingTasks = totalTasks - completedTasks;
 
             document.getElementById('totalTasks').textContent = totalTasks;
             document.getElementById('completedTasks').textContent = completedTasks;
             document.getElementById('totalPointsGiven').textContent = totalPoints;
             document.getElementById('pendingTasks').textContent = pendingTasks;
+        }
+
+        // Update task history statistics
+        function updateTaskHistoryStats() {
+            // Get all completions
+            let allCompletions = [];
+            tasks.forEach(task => {
+                allCompletions = allCompletions.concat(task.completions);
+            });
+            
+            const totalCompletions = allCompletions.length;
+            const activeStudents = new Set(allCompletions.map(c => c.studentName)).size;
+            const totalPoints = allCompletions.reduce((sum, c) => {
+                const task = tasks.find(t => t.completions.includes(c));
+                return sum + (task ? task.points : 0);
+            }, 0);
+            
+            // Today's completions
+            const today = new Date().toISOString().split('T')[0];
+            const todayCompletions = allCompletions.filter(c => 
+                c.completedAt.split('T')[0] === today
+            ).length;
+
+            document.getElementById('totalCompletions').textContent = totalCompletions;
+            document.getElementById('activeStudentsHistory').textContent = activeStudents;
+            document.getElementById('totalPointsHistory').textContent = totalPoints;
+            document.getElementById('todayCompletions').textContent = todayCompletions;
         }
 
         // Update student statistics
@@ -1974,9 +2032,9 @@
         function loadAnalytics() {
             const activeStudents = students.filter(s => s.completedTasks.length > 0).length;
             const totalPossibleCompletions = tasks.reduce((sum, task) => {
-                return sum + (task.assignedTo[0] === 'all' ? students.length : task.assignedTo.length);
+                return sum + (task.assignedTo === 'all' ? students.length : task.assignedTo.length);
             }, 0);
-            const totalActualCompletions = tasks.reduce((sum, task) => sum + task.completedBy.length, 0);
+            const totalActualCompletions = tasks.reduce((sum, task) => sum + task.completions.length, 0);
             const taskCompletionRate = totalPossibleCompletions > 0 
                 ? Math.round((totalActualCompletions / totalPossibleCompletions) * 100) 
                 : 0;
@@ -2024,17 +2082,37 @@
         function populateStudentSelects() {
             const editSelect = document.getElementById('editStudentSelect');
             const deductSelect = document.getElementById('deductStudentSelect');
-            const taskSelect = document.getElementById('taskAssignedTo');
             
             editSelect.innerHTML = '<option value="">Select student</option>';
             deductSelect.innerHTML = '<option value="">Select student</option>';
-            taskSelect.innerHTML = '<option value="all">All Students</option>';
             
             students.forEach(student => {
                 editSelect.innerHTML += `<option value="${student.name}">${student.name} (${student.baseMarks + student.taskPoints})</option>`;
                 deductSelect.innerHTML += `<option value="${student.name}">${student.name} (${student.baseMarks + student.taskPoints})</option>`;
-                taskSelect.innerHTML += `<option value="${student.name}">${student.name}</option>`;
             });
+        }
+
+        // Toggle student selection in add task modal
+        function toggleStudentSelection() {
+            const assignType = document.querySelector('input[name="assignType"]:checked').value;
+            const studentSelectionGroup = document.getElementById('studentSelectionGroup');
+            
+            if (assignType === 'specific') {
+                studentSelectionGroup.style.display = 'block';
+                // Populate student checkboxes
+                const checkboxesDiv = document.getElementById('studentCheckboxes');
+                checkboxesDiv.innerHTML = '';
+                students.forEach(student => {
+                    checkboxesDiv.innerHTML += `
+                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                            <input type="checkbox" value="${student.name}" checked>
+                            <span>${student.name}</span>
+                        </label>
+                    `;
+                });
+            } else {
+                studentSelectionGroup.style.display = 'none';
+            }
         }
 
         // Show modals
@@ -2060,10 +2138,47 @@
             document.getElementById('taskTitle').value = '';
             document.getElementById('taskDescription').value = '';
             document.getElementById('taskPoints').value = 10;
-            document.getElementById('taskOptions').value = '';
-            document.getElementById('multipleStudents').checked = false;
-            document.getElementById('taskAssignedTo').multiple = false;
-            document.getElementById('selectedStudentsInfo').style.display = 'none';
+            document.getElementById('taskDueDate').valueAsDate = new Date();
+            
+            // Reset to default
+            document.querySelector('input[name="assignType"][value="all"]').checked = true;
+            toggleStudentSelection();
+        }
+
+        function showMarkTaskCompleteModal(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            selectedTaskId = taskId;
+            
+            // Set task details
+            document.getElementById('taskToCompleteTitle').textContent = task.title;
+            document.getElementById('taskToCompleteDescription').textContent = task.description;
+            document.getElementById('taskToCompletePoints').textContent = task.points;
+            
+            // Populate student checkboxes
+            const checkboxesDiv = document.getElementById('taskCompleteCheckboxes');
+            checkboxesDiv.innerHTML = '';
+            
+            // Get assigned students
+            const assignedStudents = task.assignedTo === 'all' ? 
+                students.map(s => s.name) : 
+                task.assignedTo;
+            
+            // Get already completed students
+            const completedStudents = task.completions.map(c => c.studentName);
+            
+            assignedStudents.forEach(studentName => {
+                const isCompleted = completedStudents.includes(studentName);
+                checkboxesDiv.innerHTML += `
+                    <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                        <input type="checkbox" value="${studentName}" ${isCompleted ? 'disabled' : ''}>
+                        <span>${studentName} ${isCompleted ? '(Already Completed)' : ''}</span>
+                    </label>
+                `;
+            });
+            
+            document.getElementById('markTaskCompleteModal').style.display = 'flex';
         }
 
         // Close modals
@@ -2102,8 +2217,7 @@
                 baseMarks: marks,
                 taskPoints: 0,
                 completedTasks: [],
-                totalTasks: 0,
-                taskOptionsCompleted: {}
+                totalTasks: 0
             });
 
             closeModal('addStudentModal');
@@ -2181,10 +2295,23 @@
         // Delete student
         function deleteStudent(studentName) {
             if (confirm(`Are you sure you want to delete ${studentName}?`)) {
+                // Remove student from all tasks
+                tasks.forEach(task => {
+                    if (Array.isArray(task.assignedTo)) {
+                        task.assignedTo = task.assignedTo.filter(name => name !== studentName);
+                    }
+                    // Remove completions by this student
+                    task.completions = task.completions.filter(c => c.studentName !== studentName);
+                });
+                
                 students = students.filter(s => s.name !== studentName);
                 loadStudentsTable();
                 populateStudentSelects();
+                loadTasks();
+                loadTaskHistory();
                 updateAdminStats();
+                updateTaskStats();
+                updateTaskHistoryStats();
                 showMessage(`Student ${studentName} deleted!`, 'success');
             }
         }
@@ -2194,11 +2321,10 @@
             const title = document.getElementById('taskTitle').value.trim();
             const description = document.getElementById('taskDescription').value.trim();
             const points = parseInt(document.getElementById('taskPoints').value);
-            const optionsInput = document.getElementById('taskOptions').value.trim();
-            const assignedToSelect = document.getElementById('taskAssignedTo');
-            const multipleStudents = document.getElementById('multipleStudents').checked;
+            const dueDate = document.getElementById('taskDueDate').value;
+            const assignType = document.querySelector('input[name="assignType"]:checked').value;
 
-            if (!title || !description || !points) {
+            if (!title || !description || !points || !dueDate) {
                 showMessage('Please fill all fields!', 'error');
                 return;
             }
@@ -2208,23 +2334,18 @@
                 return;
             }
 
-            // Parse task options
-            const taskOptions = optionsInput ? optionsInput.split('|').map(opt => opt.trim()).filter(opt => opt) : [];
-
             // Get assigned students
-            let assignedTo = [];
-            if (multipleStudents) {
-                // Multiple selection
-                for (let option of assignedToSelect.selectedOptions) {
-                    assignedTo.push(option.value);
-                }
+            let assignedTo;
+            if (assignType === 'all') {
+                assignedTo = 'all';
+            } else {
+                // Get selected students
+                const checkboxes = document.querySelectorAll('#studentCheckboxes input[type="checkbox"]:checked');
+                assignedTo = Array.from(checkboxes).map(cb => cb.value);
                 if (assignedTo.length === 0) {
                     showMessage('Please select at least one student!', 'error');
                     return;
                 }
-            } else {
-                // Single selection
-                assignedTo = [assignedToSelect.value];
             }
 
             const newTask = {
@@ -2235,15 +2356,14 @@
                 assignedTo: assignedTo,
                 createdBy: currentUser.name,
                 createdAt: new Date().toISOString(),
-                completedBy: [],
-                isCompleted: false,
-                taskOptions: taskOptions
+                dueDate: dueDate,
+                completions: []
             };
 
             tasks.push(newTask);
             
-            // Update total tasks for assigned students
-            if (assignedTo[0] === 'all') {
+            // Update total tasks count for assigned students
+            if (assignedTo === 'all') {
                 students.forEach(student => {
                     student.totalTasks++;
                 });
@@ -2265,58 +2385,55 @@
             showMessage('Task added successfully!', 'success');
         }
 
-        // Complete task as student (for tasks without options)
-        function completeTaskAsStudent(taskId) {
-            if (!currentStudent) return;
-
-            const task = tasks.find(t => t.id === taskId);
+        // Mark task as complete for selected students
+        function markTaskAsComplete() {
+            const task = tasks.find(t => t.id === selectedTaskId);
             if (!task) return;
 
-            // Check if task is assigned to this student
-            if (task.assignedTo[0] !== 'all' && !task.assignedTo.includes(currentStudent.name)) {
-                showMessage('This task is not assigned to you!', 'error');
+            // Get selected students
+            const checkboxes = document.querySelectorAll('#taskCompleteCheckboxes input[type="checkbox"]:checked');
+            const selectedStudents = Array.from(checkboxes).map(cb => cb.value);
+            const completionDate = document.getElementById('completionDate').value;
+
+            if (selectedStudents.length === 0) {
+                showMessage('Please select at least one student!', 'error');
                 return;
             }
 
-            // Check if already completed
-            if (task.completedBy.some(completion => completion.studentName === currentStudent.name)) {
-                showMessage('You have already completed this task!', 'error');
-                return;
-            }
-
-            // Add to completed by
-            task.completedBy.push({
-                studentName: currentStudent.name,
-                selectedOption: null,
-                completedAt: new Date().toISOString()
+            // Mark completion for each selected student
+            selectedStudents.forEach(studentName => {
+                // Check if already completed
+                if (!task.completions.find(c => c.studentName === studentName)) {
+                    // Add completion record
+                    task.completions.push({
+                        studentName: studentName,
+                        completedAt: completionDate + 'T12:00:00', // Add time
+                        markedBy: currentUser.name
+                    });
+                    
+                    // Update student's points and completed tasks
+                    const student = students.find(s => s.name === studentName);
+                    if (student) {
+                        student.taskPoints += task.points;
+                        student.completedTasks.push(task.id);
+                    }
+                }
             });
-            
-            // Update student points
-            currentStudent.taskPoints += task.points;
-            currentStudent.completedTasks.push(taskId);
-            
-            // Check if all assigned students have completed the task
-            if (task.assignedTo[0] === 'all') {
-                task.isCompleted = task.completedBy.length === students.length;
-            } else {
-                const allAssignedCompleted = task.assignedTo.every(studentName => 
-                    task.completedBy.some(completion => completion.studentName === studentName)
-                );
-                task.isCompleted = allAssignedCompleted;
-            }
 
-            // Update points display with animation
-            const pointsElement = document.getElementById('studentTotalPoints');
-            pointsElement.textContent = currentStudent.taskPoints;
-            pointsElement.classList.add('points-added');
-            setTimeout(() => pointsElement.classList.remove('points-added'), 500);
-
-            loadMyTasks();
-            loadStudentTable();
-            loadTopStudents();
-            updateStudentStats();
+            closeModal('markTaskCompleteModal');
+            loadTasks();
+            loadStudentsTable();
+            loadTaskHistory();
             updateTaskStats();
-            showMessage(`Task completed! You earned ${task.points} points!`, 'success');
+            updateAdminStats();
+            updateTaskHistoryStats();
+            
+            if (currentUser.role === 'student') {
+                loadMyTasks();
+                updateStudentStats();
+            }
+            
+            showMessage(`Task marked as complete for ${selectedStudents.length} student(s)!`, 'success');
         }
 
         // Delete task
@@ -2326,28 +2443,38 @@
                 if (taskIndex !== -1) {
                     const task = tasks[taskIndex];
                     
-                    // Remove from students' completed tasks and deduct points
-                    task.completedBy.forEach(completion => {
+                    // Remove task points from students and update counts
+                    task.completions.forEach(completion => {
                         const student = students.find(s => s.name === completion.studentName);
                         if (student) {
-                            // Remove task points
                             student.taskPoints = Math.max(0, student.taskPoints - task.points);
-                            // Remove from completed tasks
                             student.completedTasks = student.completedTasks.filter(id => id !== taskId);
-                            // Remove from task options completed
-                            if (student.taskOptionsCompleted[taskId]) {
-                                delete student.taskOptionsCompleted[taskId];
-                            }
                         }
                     });
+                    
+                    // Update total tasks count
+                    if (task.assignedTo === 'all') {
+                        students.forEach(student => {
+                            student.totalTasks = Math.max(0, student.totalTasks - 1);
+                        });
+                    } else if (Array.isArray(task.assignedTo)) {
+                        task.assignedTo.forEach(studentName => {
+                            const student = students.find(s => s.name === studentName);
+                            if (student) {
+                                student.totalTasks = Math.max(0, student.totalTasks - 1);
+                            }
+                        });
+                    }
                     
                     // Remove task
                     tasks.splice(taskIndex, 1);
                     
                     loadTasks();
                     loadStudentsTable();
+                    loadTaskHistory();
                     updateTaskStats();
                     updateAdminStats();
+                    updateTaskHistoryStats();
                     if (currentUser.role === 'student') {
                         loadMyTasks();
                         updateStudentStats();
@@ -2372,6 +2499,18 @@
                 day: '2-digit',
                 month: 'short',
                 year: 'numeric'
+            });
+        }
+
+        // Format date and time
+        function formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+            return date.toLocaleString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
         }
 
@@ -2401,6 +2540,9 @@
             
             // Populate student selects
             populateStudentSelects();
+            
+            // Set default due date for task modal
+            document.getElementById('taskDueDate').valueAsDate = new Date();
         });
 
         // Auto-refresh data every 30 seconds
@@ -2409,6 +2551,7 @@
                 if (currentUser.role === 'admin') {
                     updateAdminStats();
                     updateTaskStats();
+                    updateTaskHistoryStats();
                 } else {
                     updateStudentStats();
                 }
