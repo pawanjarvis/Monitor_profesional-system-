@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Class Monitor System - Professional</title>
+    <title>Class Monitor System - Complete</title>
     <style>
         * {
             margin: 0;
@@ -205,6 +205,48 @@
             padding: 30px 40px;
         }
 
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 25px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #3f51b5;
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #e0e0e0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
         /* Stats Cards */
         .stats-container {
             display: grid;
@@ -290,52 +332,159 @@
             background: linear-gradient(135deg, #f44336, #d32f2f);
         }
 
-        .action-btn.edit {
+        .action-btn.task {
             background: linear-gradient(135deg, #FF9800, #F57C00);
         }
 
-        /* Search Bar */
-        .search-container {
-            margin-bottom: 30px;
-        }
-
-        .search-box {
-            display: flex;
-            gap: 10px;
-            max-width: 600px;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s;
+        /* Tasks Section */
+        .tasks-section {
             background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #e3f2fd;
         }
 
-        .search-box input:focus {
-            outline: none;
-            border-color: #3f51b5;
-            background: white;
-            box-shadow: 0 5px 15px rgba(63, 81, 181, 0.1);
+        .section-title {
+            color: #1a237e;
+            font-size: 22px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .search-box button {
-            padding: 15px 25px;
-            background: linear-gradient(135deg, #3f51b5, #283593);
+        .add-task-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             transition: all 0.3s;
         }
 
-        .search-box button:hover {
+        .add-task-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(63, 81, 181, 0.2);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.2);
+        }
+
+        .tasks-list {
+            margin-top: 20px;
+        }
+
+        .task-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #3f51b5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .task-item.completed {
+            border-left-color: #4CAF50;
+            background: #f8fff8;
+        }
+
+        .task-item.overdue {
+            border-left-color: #f44336;
+            background: #fff8f8;
+        }
+
+        .task-info {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .task-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a237e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .task-desc {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .task-meta div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .task-points {
+            background: #FF9800;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .task-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .complete-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .complete-btn:hover {
+            background: #388E3C;
+            transform: translateY(-2px);
+        }
+
+        .complete-btn.completed {
+            background: #757575;
+            cursor: not-allowed;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
         }
 
         /* Students Table */
@@ -386,12 +535,21 @@
         .student-name-cell {
             font-weight: 600;
             color: #1a237e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .marks-cell {
             font-weight: 700;
             font-size: 18px;
             color: #2196F3;
+        }
+
+        .tasks-cell {
+            font-weight: 600;
+            font-size: 16px;
+            color: #FF5722;
         }
 
         .status-cell {
@@ -401,7 +559,7 @@
         .rank-cell {
             font-weight: 700;
             font-size: 18px;
-            color: #FF5722;
+            color: #9C27B0;
         }
 
         .action-cell button {
@@ -632,6 +790,59 @@
             margin: 10px 0;
         }
 
+        /* Points Animation */
+        @keyframes pointsAdded {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .points-added {
+            animation: pointsAdded 0.5s ease;
+        }
+
+        /* Task Options */
+        .task-options {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .task-options-title {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+    font-size: 14px;
+        }
+
+        .option-item {
+            padding: 5px 0;
+            color: #555;
+            font-size: 13px;
+        }
+
+        /* Task Selection Modal */
+        .task-selection-modal {
+            max-width: 600px;
+        }
+
+        .option-select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .option-select:focus {
+            outline: none;
+            border-color: #3f51b5;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
@@ -648,6 +859,15 @@
                 padding: 20px;
             }
             
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
             .action-buttons {
                 flex-direction: column;
             }
@@ -655,6 +875,16 @@
             .action-btn {
                 width: 100%;
                 justify-content: center;
+            }
+            
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .task-actions {
+                width: 100%;
+                justify-content: flex-end;
             }
             
             .search-box {
@@ -691,7 +921,7 @@
             <div class="logo">
                 <i class="fas fa-graduation-cap"></i>
                 <h1>Class Monitor System</h1>
-                <p>Professional Admin & Student Dashboard</p>
+                <p>Complete Students & Tasks Management</p>
             </div>
 
             <div class="login-form">
@@ -741,7 +971,7 @@
             <div class="header">
                 <div class="header-info">
                     <h1><i class="fas fa-user-shield"></i> Admin Dashboard</h1>
-                    <p>Manage all students data and marks</p>
+                    <p>Manage Students, Marks & Tasks</p>
                 </div>
                 <div class="user-controls">
                     <button class="logout-btn" onclick="logout()">
@@ -752,75 +982,158 @@
 
             <!-- Content -->
             <div class="dashboard-content">
-                <!-- Stats -->
-                <div class="stats-container">
-                    <div class="stat-card">
-                        <i class="fas fa-users"></i>
-                        <div class="number" id="totalStudents">0</div>
-                        <div class="label">Total Students</div>
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('students')">
+                        <i class="fas fa-users"></i> Students
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('tasks')">
+                        <i class="fas fa-tasks"></i> Tasks
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('analytics')">
+                        <i class="fas fa-chart-bar"></i> Analytics
+                    </button>
+                </div>
+
+                <!-- Students Tab -->
+                <div class="tab-content active" id="studentsTab">
+                    <!-- Stats -->
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <i class="fas fa-users"></i>
+                            <div class="number" id="totalStudents">25</div>
+                            <div class="label">Total Students</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-chart-line"></i>
+                            <div class="number" id="avgMarks">100%</div>
+                            <div class="label">Average Marks</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-trophy"></i>
+                            <div class="number" id="topScore">100</div>
+                            <div class="label">Top Score</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-star"></i>
+                            <div class="number" id="taskPoints">0</div>
+                            <div class="label">Task Points Given</div>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-chart-line"></i>
-                        <div class="number" id="avgMarks">0%</div>
-                        <div class="label">Average Marks</div>
+
+                    <!-- Admin Controls -->
+                    <div class="admin-controls">
+                        <h3><i class="fas fa-cogs"></i> Student Management</h3>
+                        <div class="action-buttons">
+                            <button class="action-btn add" onclick="showAddStudentModal()">
+                                <i class="fas fa-user-plus"></i> Add Student
+                            </button>
+                            <button class="action-btn" onclick="showEditMarksModal()">
+                                <i class="fas fa-edit"></i> Edit Marks
+                            </button>
+                            <button class="action-btn deduct" onclick="showDeductMarksModal()">
+                                <i class="fas fa-minus-circle"></i> Deduct Marks
+                            </button>
+                            <button class="action-btn task" onclick="switchTab('tasks')">
+                                <i class="fas fa-tasks"></i> Manage Tasks
+                            </button>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-trophy"></i>
-                        <div class="number" id="topScore">0</div>
-                        <div class="label">Top Score</div>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-medal"></i>
-                        <div class="number" id="excellentCount">0</div>
-                        <div class="label">Excellent Students</div>
+
+                    <!-- Students Table -->
+                    <div class="students-table-container">
+                        <table class="students-table">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Base Marks</th>
+                                    <th>Task Points</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Rank</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                <!-- Students data will be loaded here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Admin Controls -->
-                <div class="admin-controls">
-                    <h3><i class="fas fa-cogs"></i> Admin Controls</h3>
-                    <div class="action-buttons">
-                        <button class="action-btn add" onclick="showAddStudentModal()">
-                            <i class="fas fa-user-plus"></i> Add New Student
-                        </button>
-                        <button class="action-btn edit" onclick="showEditMarksModal()">
-                            <i class="fas fa-edit"></i> Edit Student Marks
-                        </button>
-                        <button class="action-btn deduct" onclick="showDeductMarksModal()">
-                            <i class="fas fa-minus-circle"></i> Deduct Marks
-                        </button>
-                        <button class="action-btn" onclick="refreshData()">
-                            <i class="fas fa-sync-alt"></i> Refresh Data
-                        </button>
+                <!-- Tasks Tab -->
+                <div class="tab-content" id="tasksTab">
+                    <!-- Stats -->
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <i class="fas fa-tasks"></i>
+                            <div class="number" id="totalTasks">0</div>
+                            <div class="label">Total Tasks</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="number" id="completedTasks">0</div>
+                            <div class="label">Completed Tasks</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-star"></i>
+                            <div class="number" id="totalPointsGiven">0</div>
+                            <div class="label">Points Given</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-clock"></i>
+                            <div class="number" id="pendingTasks">0</div>
+                            <div class="label">Pending Tasks</div>
+                        </div>
+                    </div>
+
+                    <!-- Tasks Management -->
+                    <div class="tasks-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 class="section-title"><i class="fas fa-tasks"></i> Tasks Management</h3>
+                            <button class="add-task-btn" onclick="showAddTaskModal()">
+                                <i class="fas fa-plus"></i> Add New Task
+                            </button>
+                        </div>
+
+                        <div class="tasks-list" id="tasksList">
+                            <!-- Tasks will be loaded here -->
+                        </div>
                     </div>
                 </div>
 
-                <!-- Search -->
-                <div class="search-container">
-                    <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="Search student by name..." onkeyup="searchStudents()">
-                        <button onclick="clearSearch()">
-                            <i class="fas fa-times"></i> Clear Search
-                        </button>
+                <!-- Analytics Tab -->
+                <div class="tab-content" id="analyticsTab">
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <i class="fas fa-user-check"></i>
+                            <div class="number" id="activeStudents">0</div>
+                            <div class="label">Active Students</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-tasks"></i>
+                            <div class="number" id="taskCompletion">0%</div>
+                            <div class="label">Task Completion</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-gift"></i>
+                            <div class="number" id="avgPointsPerStudent">0</div>
+                            <div class="label">Avg Points/Student</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-calendar-alt"></i>
+                            <div class="number" id="todayTasks">0</div>
+                            <div class="label">Today's Tasks</div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Students Table -->
-                <div class="students-table-container">
-                    <table class="students-table">
-                        <thead>
-                            <tr>
-                                <th>Student Name</th>
-                                <th>Marks</th>
-                                <th>Status</th>
-                                <th>Rank</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentsTableBody">
-                            <!-- Data will be loaded here -->
-                        </tbody>
-                    </table>
+                    <!-- Analytics Content -->
+                    <div class="tasks-section">
+                        <h3 class="section-title"><i class="fas fa-chart-pie"></i> Performance Analytics</h3>
+                        <div id="analyticsContent" style="padding: 20px;">
+                            <!-- Analytics will be shown here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -831,9 +1144,13 @@
             <div class="header">
                 <div class="header-info">
                     <h1><i class="fas fa-user-graduate"></i> Student Dashboard</h1>
-                    <p>View your class performance</p>
+                    <p>View Your Performance & Tasks</p>
                 </div>
                 <div class="user-controls">
+                    <div style="background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 8px;">
+                        <i class="fas fa-star" style="color: #FFD700;"></i>
+                        <span id="studentTotalPoints">0</span> Task Points
+                    </div>
                     <button class="logout-btn" onclick="logout()">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
@@ -842,32 +1159,33 @@
 
             <!-- Content -->
             <div class="dashboard-content">
+                <!-- Welcome Message -->
                 <div class="welcome-message">
                     <i class="fas fa-info-circle"></i>
-                    <p>Welcome <span id="studentUserName">Student</span>! Real-time data from admin</p>
+                    <p>Welcome <span id="studentName">Student</span>! Complete tasks to earn points</p>
                 </div>
 
                 <!-- Stats -->
                 <div class="stats-container">
                     <div class="stat-card">
-                        <i class="fas fa-users"></i>
-                        <div class="number" id="studentTotalStudents">0</div>
-                        <div class="label">Class Strength</div>
+                        <i class="fas fa-user"></i>
+                        <div class="number" id="myBaseMarks">100</div>
+                        <div class="label">Base Marks</div>
                     </div>
                     <div class="stat-card">
-                        <i class="fas fa-chart-line"></i>
-                        <div class="number" id="studentAvgMarks">0%</div>
-                        <div class="label">Class Average</div>
+                        <i class="fas fa-star"></i>
+                        <div class="number" id="myTaskPoints">0</div>
+                        <div class="label">Task Points</div>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-trophy"></i>
-                        <div class="number" id="studentTopScore">0</div>
-                        <div class="label">Top Score</div>
+                        <div class="number" id="myTotalMarks">100</div>
+                        <div class="label">Total Marks</div>
                     </div>
                     <div class="stat-card">
-                        <i class="fas fa-clock"></i>
-                        <div class="number" id="lastUpdate">Now</div>
-                        <div class="label">Last Updated</div>
+                        <i class="fas fa-medal"></i>
+                        <div class="number" id="myRank">1</div>
+                        <div class="label">Class Rank</div>
                     </div>
                 </div>
 
@@ -876,25 +1194,26 @@
                     <!-- Top students will be loaded here -->
                 </div>
 
-                <!-- Search -->
-                <div class="search-container">
-                    <div class="search-box">
-                        <input type="text" id="studentSearchInput" placeholder="Search student by name..." onkeyup="searchStudentsStudent()">
-                        <button onclick="clearSearchStudent()">
-                            <i class="fas fa-times"></i> Clear
-                        </button>
+                <!-- My Tasks -->
+                <div class="tasks-section">
+                    <h3 class="section-title"><i class="fas fa-tasks"></i> My Tasks</h3>
+                    <div class="tasks-list" id="myTasksList">
+                        <!-- Student's tasks will be loaded here -->
                     </div>
                 </div>
 
-                <!-- Students Table -->
+                <!-- Class Ranking -->
                 <div class="students-table-container">
                     <table class="students-table">
                         <thead>
                             <tr>
-                                <th>Student Name</th>
-                                <th>Marks</th>
-                                <th>Status</th>
                                 <th>Rank</th>
+                                <th>Student Name</th>
+                                <th>Base Marks</th>
+                                <th>Task Points</th>
+                                <th>Total</th>
+                                <th>Tasks Done</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="studentStudentsTableBody">
@@ -958,13 +1277,6 @@
                     <input type="number" id="editMarksValue" min="0" max="100" placeholder="Enter marks">
                 </div>
             </div>
-            <div class="form-group">
-                <label>Reason for Change</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-comment"></i>
-                    <input type="text" id="editReason" placeholder="Enter reason">
-                </div>
-            </div>
             <div class="modal-actions">
                 <button class="modal-btn secondary" onclick="closeModal('editMarksModal')">Cancel</button>
                 <button class="modal-btn primary" onclick="editStudentMarks()">Update Marks</button>
@@ -1004,16 +1316,96 @@
                     </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Reason for Deduction</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-comment"></i>
-                    <input type="text" id="deductReason" placeholder="Enter reason">
-                </div>
-            </div>
             <div class="modal-actions">
                 <button class="modal-btn secondary" onclick="closeModal('deductMarksModal')">Cancel</button>
                 <button class="modal-btn primary" onclick="deductStudentMarks()">Deduct Marks</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div class="modal" id="addTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-plus-circle"></i> Add New Task</h3>
+                <button class="close-btn" onclick="closeModal('addTaskModal')">×</button>
+            </div>
+            <div class="form-group">
+                <label>Task Title</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-heading"></i>
+                    <input type="text" id="taskTitle" placeholder="Enter task title">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Task Description</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-align-left"></i>
+                    <input type="text" id="taskDescription" placeholder="Enter task description">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Points (10-100)</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-star"></i>
+                        <input type="number" id="taskPoints" value="10" min="10" max="100">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Task Options (Optional)</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-list"></i>
+                        <input type="text" id="taskOptions" placeholder="Option1|Option2|Option3 (separate with |)">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="multipleStudents" onchange="toggleMultipleStudents()">
+                    Assign to Multiple Specific Students
+                </label>
+            </div>
+            <div class="form-group">
+                <label>Assigned To</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-users"></i>
+                    <select id="taskAssignedTo">
+                        <option value="all">All Students</option>
+                        <!-- Student options will be loaded dynamically -->
+                    </select>
+                </div>
+                <small id="selectedStudentsInfo" style="display: none; color: #666; margin-top: 5px;">
+                    Hold Ctrl to select multiple students
+                </small>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" onclick="closeModal('addTaskModal')">Cancel</button>
+                <button class="modal-btn primary" onclick="addNewTask()">Add Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Selection Modal (for students when task has options) -->
+    <div class="modal" id="taskSelectionModal">
+        <div class="modal-content task-selection-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-tasks"></i> Select Task Option</h3>
+                <button class="close-btn" onclick="closeModal('taskSelectionModal')">×</button>
+            </div>
+            <div class="form-group">
+                <h4 id="selectedTaskTitle"></h4>
+                <p id="selectedTaskDescription"></p>
+            </div>
+            <div class="form-group">
+                <label>Choose an option to complete:</label>
+                <select class="option-select" id="taskOptionSelect">
+                    <!-- Options will be loaded dynamically -->
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" onclick="closeModal('taskSelectionModal')">Cancel</button>
+                <button class="modal-btn primary" onclick="completeSelectedTaskOption()">Complete Selected Option</button>
             </div>
         </div>
     </div>
@@ -1028,36 +1420,66 @@
             'student': { password: 'student123', role: 'student', name: 'Student' }
         };
 
-        // Students Data (Initially with 25 students at 100 marks)
+        // Students Data (25 students with 100 base marks as requested)
         let students = [
-            { name: "Afjal Ali", marks: 100, history: [] },
-            { name: "Deepak Sahani", marks: 100, history: [] },
-            { name: "Vivek Yadav", marks: 100, history: [] },
-            { name: "Sai Nath Jaiswal", marks: 100, history: [] },
-            { name: "Shaurya Gupta", marks: 100, history: [] },
-            { name: "Tejas", marks: 100, history: [] },
-            { name: "Krishna", marks: 100, history: [] },
-            { name: "Vinyak Rungta", marks: 100, history: [] },
-            { name: "Aryan Dubey", marks: 100, history: [] },
-            { name: "Anup Vishwakarma", marks: 100, history: [] },
-            { name: "Aryan Kumar Singh", marks: 100, history: [] },
-            { name: "Vidyasagar Kushwaha", marks: 100, history: [] },
-            { name: "Jishan Ali", marks: 100, history: [] },
-            { name: "Arsh Ali", marks: 100, history: [] },
-            { name: "Anupam Prajapati", marks: 100, history: [] },
-            { name: "Kanishk Jaiswal", marks: 100, history: [] },
-            { name: "Aarav Pal", marks: 100, history: [] },
-            { name: "Sajid Ali", marks: 100, history: [] },
-            { name: "Roy Maddheshiya", marks: 100, history: [] },
-            { name: "Hitesh Saini", marks: 100, history: [] },
-            { name: "Nitesh Gond", marks: 100, history: [] },
-            { name: "Subham Yadav", marks: 100, history: [] },
-            { name: "Aryan Sharma", marks: 100, history: [] },
-            { name: "Rajveer Yadav", marks: 100, history: [] }
+            { name: "Afjal Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Deepak Sahani", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Vivek Yadav", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Sai Nath Jaiswal", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Shaurya Gupta", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Tejas", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Krishna", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Vinyak Rungta", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Aryan Dubey", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Anup Vishwakarma", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Aryan Kumar Singh", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Vidyasagar Kushwaha", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Jishan Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Arsh Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Anupam Prajapati", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Kanishk Jaiswal", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Aarav Pal", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Sajid Ali", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Roy Maddheshiya", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Hitesh Saini", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Nitesh Gond", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Subham Yadav", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Aryan Sharma", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} },
+            { name: "Rajveer Yadav", baseMarks: 100, taskPoints: 0, completedTasks: [], totalTasks: 0, taskOptionsCompleted: {} }
         ];
 
-        // Current user
+        // Tasks Data - Updated structure for multiple students and options
+        let tasks = [
+            {
+                id: 1,
+                title: "Complete Assignment (Choose One)",
+                description: "Complete one of the following assignments",
+                points: 20,
+                assignedTo: ["all"], // Array of student names or ["all"]
+                createdBy: "admin",
+                createdAt: new Date().toISOString(),
+                completedBy: [], // Array of objects: {studentName, selectedOption}
+                isCompleted: false,
+                taskOptions: ["Maths Assignment", "Science Project", "English Essay"] // Multiple options
+            },
+            {
+                id: 2,
+                title: "Group Activity",
+                description: "Participate in group activity with selected students",
+                points: 15,
+                assignedTo: ["Afjal Ali", "Deepak Sahani", "Vivek Yadav"], // Specific students
+                createdBy: "admin",
+                createdAt: new Date().toISOString(),
+                completedBy: [],
+                isCompleted: false,
+                taskOptions: [] // No options - single task
+            }
+        ];
+
+        // Current user and selected task for editing
         let currentUser = null;
+        let currentStudent = null;
+        let selectedTaskId = null;
 
         // Login function
         function login() {
@@ -1084,7 +1506,9 @@
                     loadAdminDashboard();
                 } else {
                     document.getElementById('studentDashboard').style.display = 'block';
-                    document.getElementById('studentUserName').textContent = currentUser.name;
+                    // For demo, student sees first student's data
+                    currentStudent = students[0];
+                    document.getElementById('studentName').textContent = currentStudent.name;
                     loadStudentDashboard();
                 }
                 
@@ -1097,6 +1521,7 @@
         // Logout function
         function logout() {
             currentUser = null;
+            currentStudent = null;
             document.getElementById('loginSection').style.display = 'block';
             document.getElementById('adminDashboard').style.display = 'none';
             document.getElementById('studentDashboard').style.display = 'none';
@@ -1105,60 +1530,86 @@
             closeAllModals();
         }
 
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show selected tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
+
+            // Refresh data if needed
+            if (tabName === 'students') {
+                loadStudentsTable();
+                updateAdminStats();
+            } else if (tabName === 'tasks') {
+                loadTasks();
+                updateTaskStats();
+            } else if (tabName === 'analytics') {
+                loadAnalytics();
+            }
+        }
+
+        // Toggle multiple students selection
+        function toggleMultipleStudents() {
+            const multipleCheckbox = document.getElementById('multipleStudents');
+            const assignedToSelect = document.getElementById('taskAssignedTo');
+            const infoText = document.getElementById('selectedStudentsInfo');
+            
+            if (multipleCheckbox.checked) {
+                assignedToSelect.multiple = true;
+                assignedToSelect.size = 5;
+                infoText.style.display = 'block';
+            } else {
+                assignedToSelect.multiple = false;
+                assignedToSelect.size = 1;
+                infoText.style.display = 'none';
+            }
+        }
+
         // Load admin dashboard
         function loadAdminDashboard() {
-            updateStats();
             loadStudentsTable();
+            loadTasks();
             populateStudentSelects();
+            updateAdminStats();
+            updateTaskStats();
         }
 
         // Load student dashboard
         function loadStudentDashboard() {
             updateStudentStats();
-            loadStudentView();
             loadTopStudents();
-        }
-
-        // Update statistics
-        function updateStats() {
-            const totalStudents = students.length;
-            const totalMarks = students.reduce((sum, s) => sum + s.marks, 0);
-            const avgMarks = (totalMarks / totalStudents).toFixed(1);
-            const topScore = Math.max(...students.map(s => s.marks));
-            const excellentCount = students.filter(s => s.marks >= 85).length;
-
-            document.getElementById('totalStudents').textContent = totalStudents;
-            document.getElementById('avgMarks').textContent = `${avgMarks}%`;
-            document.getElementById('topScore').textContent = topScore;
-            document.getElementById('excellentCount').textContent = excellentCount;
-        }
-
-        // Update student stats
-        function updateStudentStats() {
-            const totalStudents = students.length;
-            const totalMarks = students.reduce((sum, s) => sum + s.marks, 0);
-            const avgMarks = (totalMarks / totalStudents).toFixed(1);
-            const topScore = Math.max(...students.map(s => s.marks));
-
-            document.getElementById('studentTotalStudents').textContent = totalStudents;
-            document.getElementById('studentAvgMarks').textContent = `${avgMarks}%`;
-            document.getElementById('studentTopScore').textContent = topScore;
-            document.getElementById('lastUpdate').textContent = 'Just now';
+            loadMyTasks();
+            loadStudentTable();
         }
 
         // Load students table for admin
         function loadStudentsTable() {
             const tableBody = document.getElementById('studentsTableBody');
-            const sortedStudents = [...students].sort((a, b) => b.marks - a.marks);
+            const sortedStudents = [...students].sort((a, b) => {
+                const totalA = a.baseMarks + a.taskPoints;
+                const totalB = b.baseMarks + b.taskPoints;
+                return totalB - totalA;
+            });
             
             tableBody.innerHTML = sortedStudents.map((student, index) => {
-                const status = getStatus(student.marks);
+                const totalMarks = student.baseMarks + student.taskPoints;
+                const status = getStatus(totalMarks);
                 return `
                     <tr>
                         <td class="student-name-cell">
                             <i class="fas fa-user"></i> ${student.name}
                         </td>
-                        <td class="marks-cell">${student.marks}/100</td>
+                        <td class="marks-cell">${student.baseMarks}</td>
+                        <td class="tasks-cell">${student.taskPoints}</td>
+                        <td class="marks-cell" style="color: #9C27B0;">${totalMarks}</td>
                         <td class="status-cell">
                             <span class="status-badge ${status.class}">${status.text}</span>
                         </td>
@@ -1176,23 +1627,263 @@
             }).join('');
         }
 
-        // Load student view
-        function loadStudentView() {
+        // Load tasks for admin
+        function loadTasks() {
+            const tasksList = document.getElementById('tasksList');
+            tasksList.innerHTML = '';
+
+            if (tasks.length === 0) {
+                tasksList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-tasks" style="font-size: 48px; margin-bottom: 15px; color: #ddd;"></i>
+                        <p>No tasks found. Create your first task!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            tasks.forEach(task => {
+                const assignedStudents = task.assignedTo[0] === 'all' ? students.length : task.assignedTo.length;
+                const completedCount = task.completedBy.length;
+                
+                // Get assigned students names
+                let assignedToText = '';
+                if (task.assignedTo[0] === 'all') {
+                    assignedToText = 'All Students';
+                } else if (task.assignedTo.length <= 3) {
+                    assignedToText = task.assignedTo.join(', ');
+                } else {
+                    assignedToText = `${task.assignedTo.length} students`;
+                }
+                
+                tasksList.innerHTML += `
+                    <div class="task-item ${task.isCompleted ? 'completed' : ''}">
+                        <div class="task-info">
+                            <div class="task-title">
+                                ${task.title}
+                                <span class="task-points">${task.points} Points</span>
+                            </div>
+                            <div class="task-desc">${task.description}</div>
+                            ${task.taskOptions && task.taskOptions.length > 0 ? `
+                                <div class="task-options">
+                                    <div class="task-options-title">
+                                        <i class="fas fa-list-check"></i> Options:
+                                    </div>
+                                    ${task.taskOptions.map(option => `
+                                        <div class="option-item">• ${option}</div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            <div class="task-meta">
+                                <div>
+                                    <i class="fas fa-users"></i>
+                                    Assigned: ${assignedToText}
+                                </div>
+                                <div>
+                                    <i class="fas fa-check"></i>
+                                    Completed: ${completedCount}/${assignedStudents}
+                                </div>
+                                <div>
+                                    <i class="fas fa-clock"></i>
+                                    Created: ${formatDate(task.createdAt)}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="task-btn delete-btn" onclick="deleteTask(${task.id})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Load tasks for student
+        function loadMyTasks() {
+            const myTasksList = document.getElementById('myTasksList');
+            myTasksList.innerHTML = '';
+
+            if (!currentStudent) return;
+
+            const myTasks = tasks.filter(task => {
+                return task.assignedTo[0] === 'all' || task.assignedTo.includes(currentStudent.name);
+            });
+
+            if (myTasks.length === 0) {
+                myTasksList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-tasks" style="font-size: 48px; margin-bottom: 15px; color: #ddd;"></i>
+                        <p>No tasks assigned to you yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            myTasks.forEach(task => {
+                const isCompleted = task.completedBy.some(completion => 
+                    completion.studentName === currentStudent.name
+                );
+                const completedByStudent = task.completedBy.find(completion => 
+                    completion.studentName === currentStudent.name
+                );
+                
+                myTasksList.innerHTML += `
+                    <div class="task-item ${isCompleted ? 'completed' : ''}">
+                        <div class="task-info">
+                            <div class="task-title">
+                                ${task.title}
+                                <span class="task-points">${task.points} Points</span>
+                            </div>
+                            <div class="task-desc">${task.description}</div>
+                            ${task.taskOptions && task.taskOptions.length > 0 ? `
+                                <div class="task-options">
+                                    <div class="task-options-title">
+                                        <i class="fas fa-list-check"></i> Options (Choose One):
+                                    </div>
+                                    ${task.taskOptions.map(option => `
+                                        <div class="option-item">• ${option}</div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            <div class="task-meta">
+                                <div>
+                                    <i class="fas fa-star"></i>
+                                    Points: ${task.points}
+                                </div>
+                                <div>
+                                    <i class="fas fa-check"></i>
+                                    Status: ${isCompleted ? 'Completed' : 'Pending'}
+                                </div>
+                                ${isCompleted && completedByStudent ? `
+                                    <div>
+                                        <i class="fas fa-check-double"></i>
+                                        Option: ${completedByStudent.selectedOption}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="task-btn complete-btn ${isCompleted ? 'completed' : ''}" 
+                                    onclick="${task.taskOptions && task.taskOptions.length > 0 ? `showTaskOptions(${task.id})` : `completeTaskAsStudent(${task.id})`}" 
+                                    ${isCompleted ? 'disabled' : ''}>
+                                <i class="fas fa-check"></i>
+                                ${isCompleted ? 'Completed' : task.taskOptions && task.taskOptions.length > 0 ? 'Select Option' : 'Complete Task'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Show task options modal for student
+        function showTaskOptions(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task || !currentStudent) return;
+
+            // Check if already completed
+            if (task.completedBy.some(completion => completion.studentName === currentStudent.name)) {
+                showMessage('You have already completed this task!', 'error');
+                return;
+            }
+
+            selectedTaskId = taskId;
+            document.getElementById('selectedTaskTitle').textContent = task.title;
+            document.getElementById('selectedTaskDescription').textContent = task.description;
+            
+            const optionSelect = document.getElementById('taskOptionSelect');
+            optionSelect.innerHTML = '<option value="">Select an option</option>';
+            
+            task.taskOptions.forEach(option => {
+                optionSelect.innerHTML += `<option value="${option}">${option}</option>`;
+            });
+            
+            document.getElementById('taskSelectionModal').style.display = 'flex';
+        }
+
+        // Complete selected task option
+        function completeSelectedTaskOption() {
+            const optionSelect = document.getElementById('taskOptionSelect');
+            const selectedOption = optionSelect.value;
+            
+            if (!selectedOption) {
+                showMessage('Please select an option!', 'error');
+                return;
+            }
+            
+            const task = tasks.find(t => t.id === selectedTaskId);
+            if (!task || !currentStudent) return;
+            
+            // Mark as completed for this student with selected option
+            task.completedBy.push({
+                studentName: currentStudent.name,
+                selectedOption: selectedOption,
+                completedAt: new Date().toISOString()
+            });
+            
+            // Update student points
+            currentStudent.taskPoints += task.points;
+            currentStudent.completedTasks.push(selectedTaskId);
+            
+            // Store which option was completed
+            if (!currentStudent.taskOptionsCompleted[selectedTaskId]) {
+                currentStudent.taskOptionsCompleted[selectedTaskId] = [];
+            }
+            currentStudent.taskOptionsCompleted[selectedTaskId].push(selectedOption);
+            
+            // Check if all assigned students have completed the task
+            if (task.assignedTo[0] === 'all') {
+                task.isCompleted = task.completedBy.length === students.length;
+            } else {
+                const allAssignedCompleted = task.assignedTo.every(studentName => 
+                    task.completedBy.some(completion => completion.studentName === studentName)
+                );
+                task.isCompleted = allAssignedCompleted;
+            }
+
+            // Update points display with animation
+            const pointsElement = document.getElementById('studentTotalPoints');
+            pointsElement.textContent = currentStudent.taskPoints;
+            pointsElement.classList.add('points-added');
+            setTimeout(() => pointsElement.classList.remove('points-added'), 500);
+
+            closeModal('taskSelectionModal');
+            loadMyTasks();
+            loadStudentTable();
+            loadTopStudents();
+            updateStudentStats();
+            updateTaskStats();
+            showMessage(`Task completed! You earned ${task.points} points for "${selectedOption}"!`, 'success');
+        }
+
+        // Load student table for student view
+        function loadStudentTable() {
             const tableBody = document.getElementById('studentStudentsTableBody');
-            const sortedStudents = [...students].sort((a, b) => b.marks - a.marks);
+            const sortedStudents = [...students].sort((a, b) => {
+                const totalA = a.baseMarks + a.taskPoints;
+                const totalB = b.baseMarks + b.taskPoints;
+                return totalB - totalA;
+            });
             
             tableBody.innerHTML = sortedStudents.map((student, index) => {
-                const status = getStatus(student.marks);
+                const totalMarks = student.baseMarks + student.taskPoints;
+                const status = getStatus(totalMarks);
+                const isCurrentStudent = student.name === currentStudent?.name;
+                
                 return `
-                    <tr>
+                    <tr ${isCurrentStudent ? 'style="background: #f0f7ff;"' : ''}>
+                        <td class="rank-cell">${index + 1}</td>
                         <td class="student-name-cell">
                             <i class="fas fa-user"></i> ${student.name}
+                            ${isCurrentStudent ? '<span style="color: #4CAF50; font-size: 12px;">(You)</span>' : ''}
                         </td>
-                        <td class="marks-cell">${student.marks}/100</td>
+                        <td class="marks-cell">${student.baseMarks}</td>
+                        <td class="tasks-cell">${student.taskPoints}</td>
+                        <td class="marks-cell" style="color: #9C27B0;">${totalMarks}</td>
+                        <td class="tasks-cell">${student.completedTasks.length}/${student.totalTasks}</td>
                         <td class="status-cell">
                             <span class="status-badge ${status.class}">${status.text}</span>
                         </td>
-                        <td class="rank-cell">${index + 1}</td>
                     </tr>
                 `;
             }).join('');
@@ -1201,42 +1892,148 @@
         // Load top 3 students for student view
         function loadTopStudents() {
             const container = document.getElementById('topStudentsContainer');
-            const topStudents = [...students].sort((a, b) => b.marks - a.marks).slice(0, 3);
+            const topStudents = [...students].sort((a, b) => {
+                const totalA = a.baseMarks + a.taskPoints;
+                const totalB = b.baseMarks + b.taskPoints;
+                return totalB - totalA;
+            }).slice(0, 3);
             
             container.innerHTML = topStudents.map((student, index) => {
                 const medals = ['🥇', '🥈', '🥉'];
+                const totalMarks = student.baseMarks + student.taskPoints;
                 return `
                     <div class="top-student-card">
                         <div class="rank">${medals[index]}</div>
                         <div class="name">${student.name}</div>
-                        <div class="marks">${student.marks}/100</div>
-                        <div class="status-badge ${getStatus(student.marks).class}" style="margin-top: 10px;">
-                            ${getStatus(student.marks).text}
+                        <div class="marks">${totalMarks}</div>
+                        <div class="status-badge ${getStatus(totalMarks).class}" style="margin-top: 10px;">
+                            ${getStatus(totalMarks).text}
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        // Get status from marks
-        function getStatus(marks) {
-            if (marks === 100) return { text: 'Perfect', class: 'status-perfect' };
-            if (marks >= 90) return { text: 'Excellent', class: 'status-excellent' };
-            if (marks >= 75) return { text: 'Good', class: 'status-good' };
+        // Get status from total marks
+        function getStatus(totalMarks) {
+            if (totalMarks >= 190) return { text: 'Perfect', class: 'status-perfect' };
+            if (totalMarks >= 175) return { text: 'Excellent', class: 'status-excellent' };
+            if (totalMarks >= 150) return { text: 'Good', class: 'status-good' };
             return { text: 'Average', class: 'status-average' };
+        }
+
+        // Update admin statistics
+        function updateAdminStats() {
+            const totalStudents = students.length;
+            const totalBaseMarks = students.reduce((sum, s) => sum + s.baseMarks, 0);
+            const totalTaskPoints = students.reduce((sum, s) => sum + s.taskPoints, 0);
+            const avgMarks = ((totalBaseMarks + totalTaskPoints) / totalStudents).toFixed(1);
+            const topScore = Math.max(...students.map(s => s.baseMarks + s.taskPoints));
+
+            document.getElementById('totalStudents').textContent = totalStudents;
+            document.getElementById('avgMarks').textContent = `${avgMarks}%`;
+            document.getElementById('topScore').textContent = topScore;
+            document.getElementById('taskPoints').textContent = totalTaskPoints;
+        }
+
+        // Update task statistics
+        function updateTaskStats() {
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(t => t.isCompleted).length;
+            const totalPoints = tasks.reduce((sum, task) => sum + (task.points * task.completedBy.length), 0);
+            const pendingTasks = totalTasks - completedTasks;
+
+            document.getElementById('totalTasks').textContent = totalTasks;
+            document.getElementById('completedTasks').textContent = completedTasks;
+            document.getElementById('totalPointsGiven').textContent = totalPoints;
+            document.getElementById('pendingTasks').textContent = pendingTasks;
+        }
+
+        // Update student statistics
+        function updateStudentStats() {
+            if (!currentStudent) return;
+
+            const totalMarks = currentStudent.baseMarks + currentStudent.taskPoints;
+            
+            // Calculate rank
+            const sortedStudents = [...students].sort((a, b) => {
+                const totalA = a.baseMarks + a.taskPoints;
+                const totalB = b.baseMarks + b.taskPoints;
+                return totalB - totalA;
+            });
+            const myRank = sortedStudents.findIndex(s => s.name === currentStudent.name) + 1;
+
+            document.getElementById('myBaseMarks').textContent = currentStudent.baseMarks;
+            document.getElementById('myTaskPoints').textContent = currentStudent.taskPoints;
+            document.getElementById('myTotalMarks').textContent = totalMarks;
+            document.getElementById('myRank').textContent = myRank;
+            document.getElementById('studentTotalPoints').textContent = currentStudent.taskPoints;
+        }
+
+        // Load analytics
+        function loadAnalytics() {
+            const activeStudents = students.filter(s => s.completedTasks.length > 0).length;
+            const totalPossibleCompletions = tasks.reduce((sum, task) => {
+                return sum + (task.assignedTo[0] === 'all' ? students.length : task.assignedTo.length);
+            }, 0);
+            const totalActualCompletions = tasks.reduce((sum, task) => sum + task.completedBy.length, 0);
+            const taskCompletionRate = totalPossibleCompletions > 0 
+                ? Math.round((totalActualCompletions / totalPossibleCompletions) * 100) 
+                : 0;
+            const avgPoints = students.length > 0 
+                ? Math.round(students.reduce((sum, s) => sum + s.taskPoints, 0) / students.length) 
+                : 0;
+            const todayTasks = tasks.filter(task => {
+                const today = new Date().toISOString().split('T')[0];
+                const createdDate = task.createdAt.split('T')[0];
+                return createdDate === today;
+            }).length;
+
+            document.getElementById('activeStudents').textContent = activeStudents;
+            document.getElementById('taskCompletion').textContent = `${taskCompletionRate}%`;
+            document.getElementById('avgPointsPerStudent').textContent = avgPoints;
+            document.getElementById('todayTasks').textContent = todayTasks;
+
+            // Update analytics display
+            const analyticsDiv = document.getElementById('analyticsContent');
+            analyticsDiv.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 10px; text-align: center;">
+                        <h4 style="color: #1a237e; margin-bottom: 10px;">Student Performance</h4>
+                        <p style="font-size: 24px; font-weight: bold; color: #3f51b5;">
+                            ${students.filter(s => s.baseMarks + s.taskPoints >= 175).length} Excellent
+                        </p>
+                    </div>
+                    <div style="background: #f3e5f5; padding: 15px; border-radius: 10px; text-align: center;">
+                        <h4 style="color: #1a237e; margin-bottom: 10px;">Tasks Distribution</h4>
+                        <p style="font-size: 24px; font-weight: bold; color: #9C27B0;">
+                            ${tasks.length} Total
+                        </p>
+                    </div>
+                    <div style="background: #e8f5e8; padding: 15px; border-radius: 10px; text-align: center;">
+                        <h4 style="color: #1a237e; margin-bottom: 10px;">Points Earned</h4>
+                        <p style="font-size: 24px; font-weight: bold; color: #4CAF50;">
+                            ${students.reduce((sum, s) => sum + s.taskPoints, 0)}
+                        </p>
+                    </div>
+                </div>
+            `;
         }
 
         // Populate student select dropdowns
         function populateStudentSelects() {
             const editSelect = document.getElementById('editStudentSelect');
             const deductSelect = document.getElementById('deductStudentSelect');
+            const taskSelect = document.getElementById('taskAssignedTo');
             
             editSelect.innerHTML = '<option value="">Select student</option>';
             deductSelect.innerHTML = '<option value="">Select student</option>';
+            taskSelect.innerHTML = '<option value="all">All Students</option>';
             
             students.forEach(student => {
-                editSelect.innerHTML += `<option value="${student.name}">${student.name} (${student.marks})</option>`;
-                deductSelect.innerHTML += `<option value="${student.name}">${student.name} (${student.marks})</option>`;
+                editSelect.innerHTML += `<option value="${student.name}">${student.name} (${student.baseMarks + student.taskPoints})</option>`;
+                deductSelect.innerHTML += `<option value="${student.name}">${student.name} (${student.baseMarks + student.taskPoints})</option>`;
+                taskSelect.innerHTML += `<option value="${student.name}">${student.name}</option>`;
             });
         }
 
@@ -1250,14 +2047,23 @@
         function showEditMarksModal() {
             document.getElementById('editMarksModal').style.display = 'flex';
             document.getElementById('editMarksValue').value = '';
-            document.getElementById('editReason').value = '';
         }
 
         function showDeductMarksModal() {
             document.getElementById('deductMarksModal').style.display = 'flex';
             document.getElementById('deductMarksValue').value = '';
-            document.getElementById('deductReason').value = '';
             document.getElementById('currentMarks').value = '';
+        }
+
+        function showAddTaskModal() {
+            document.getElementById('addTaskModal').style.display = 'flex';
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('taskPoints').value = 10;
+            document.getElementById('taskOptions').value = '';
+            document.getElementById('multipleStudents').checked = false;
+            document.getElementById('taskAssignedTo').multiple = false;
+            document.getElementById('selectedStudentsInfo').style.display = 'none';
         }
 
         // Close modals
@@ -1293,17 +2099,17 @@
 
             students.push({
                 name: name,
-                marks: marks,
-                history: [{
-                    type: 'added',
-                    marks: marks,
-                    reason: 'Initial marks',
-                    date: new Date().toLocaleString()
-                }]
+                baseMarks: marks,
+                taskPoints: 0,
+                completedTasks: [],
+                totalTasks: 0,
+                taskOptionsCompleted: {}
             });
 
             closeModal('addStudentModal');
-            updateAllDashboards();
+            loadStudentsTable();
+            populateStudentSelects();
+            updateAdminStats();
             showMessage(`Student ${name} added successfully!`, 'success');
         }
 
@@ -1311,9 +2117,8 @@
         function editStudentMarks() {
             const name = document.getElementById('editStudentSelect').value;
             const marks = parseInt(document.getElementById('editMarksValue').value);
-            const reason = document.getElementById('editReason').value.trim();
 
-            if (!name || !marks || !reason) {
+            if (!name || isNaN(marks)) {
                 showMessage('Please fill all fields!', 'error');
                 return;
             }
@@ -1324,18 +2129,14 @@
                 return;
             }
 
-            const oldMarks = student.marks;
-            student.marks = marks;
-            student.history.push({
-                type: 'edited',
-                oldMarks: oldMarks,
-                newMarks: marks,
-                reason: reason,
-                date: new Date().toLocaleString()
-            });
+            student.baseMarks = marks;
 
             closeModal('editMarksModal');
-            updateAllDashboards();
+            loadStudentsTable();
+            if (currentUser.role === 'student' && currentStudent?.name === name) {
+                updateStudentStats();
+            }
+            updateAdminStats();
             showMessage(`Updated ${name}'s marks to ${marks}!`, 'success');
         }
 
@@ -1343,9 +2144,8 @@
         function deductStudentMarks() {
             const name = document.getElementById('deductStudentSelect').value;
             const marks = parseInt(document.getElementById('deductMarksValue').value);
-            const reason = document.getElementById('deductReason').value.trim();
 
-            if (!name || !marks || !reason) {
+            if (!name || isNaN(marks)) {
                 showMessage('Please fill all fields!', 'error');
                 return;
             }
@@ -1356,20 +2156,15 @@
                 return;
             }
 
-            const newMarks = Math.max(0, student.marks - marks);
-            const oldMarks = student.marks;
-            student.marks = newMarks;
-            student.history.push({
-                type: 'deducted',
-                marksDeducted: marks,
-                oldMarks: oldMarks,
-                newMarks: newMarks,
-                reason: reason,
-                date: new Date().toLocaleString()
-            });
+            const newMarks = Math.max(0, student.baseMarks - marks);
+            student.baseMarks = newMarks;
 
             closeModal('deductMarksModal');
-            updateAllDashboards();
+            loadStudentsTable();
+            if (currentUser.role === 'student' && currentStudent?.name === name) {
+                updateStudentStats();
+            }
+            updateAdminStats();
             showMessage(`Deducted ${marks} marks from ${name}!`, 'success');
         }
 
@@ -1378,7 +2173,7 @@
             const student = students.find(s => s.name === studentName);
             if (student) {
                 document.getElementById('editStudentSelect').value = studentName;
-                document.getElementById('editMarksValue').value = student.marks;
+                document.getElementById('editMarksValue').value = student.baseMarks;
                 showEditMarksModal();
             }
         }
@@ -1387,8 +2182,178 @@
         function deleteStudent(studentName) {
             if (confirm(`Are you sure you want to delete ${studentName}?`)) {
                 students = students.filter(s => s.name !== studentName);
-                updateAllDashboards();
+                loadStudentsTable();
+                populateStudentSelects();
+                updateAdminStats();
                 showMessage(`Student ${studentName} deleted!`, 'success');
+            }
+        }
+
+        // Add new task
+        function addNewTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            const points = parseInt(document.getElementById('taskPoints').value);
+            const optionsInput = document.getElementById('taskOptions').value.trim();
+            const assignedToSelect = document.getElementById('taskAssignedTo');
+            const multipleStudents = document.getElementById('multipleStudents').checked;
+
+            if (!title || !description || !points) {
+                showMessage('Please fill all fields!', 'error');
+                return;
+            }
+
+            if (points < 10 || points > 100) {
+                showMessage('Points must be between 10 and 100!', 'error');
+                return;
+            }
+
+            // Parse task options
+            const taskOptions = optionsInput ? optionsInput.split('|').map(opt => opt.trim()).filter(opt => opt) : [];
+
+            // Get assigned students
+            let assignedTo = [];
+            if (multipleStudents) {
+                // Multiple selection
+                for (let option of assignedToSelect.selectedOptions) {
+                    assignedTo.push(option.value);
+                }
+                if (assignedTo.length === 0) {
+                    showMessage('Please select at least one student!', 'error');
+                    return;
+                }
+            } else {
+                // Single selection
+                assignedTo = [assignedToSelect.value];
+            }
+
+            const newTask = {
+                id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+                title: title,
+                description: description,
+                points: points,
+                assignedTo: assignedTo,
+                createdBy: currentUser.name,
+                createdAt: new Date().toISOString(),
+                completedBy: [],
+                isCompleted: false,
+                taskOptions: taskOptions
+            };
+
+            tasks.push(newTask);
+            
+            // Update total tasks for assigned students
+            if (assignedTo[0] === 'all') {
+                students.forEach(student => {
+                    student.totalTasks++;
+                });
+            } else {
+                assignedTo.forEach(studentName => {
+                    const student = students.find(s => s.name === studentName);
+                    if (student) {
+                        student.totalTasks++;
+                    }
+                });
+            }
+
+            closeModal('addTaskModal');
+            loadTasks();
+            updateTaskStats();
+            if (currentUser.role === 'student') {
+                loadMyTasks();
+            }
+            showMessage('Task added successfully!', 'success');
+        }
+
+        // Complete task as student (for tasks without options)
+        function completeTaskAsStudent(taskId) {
+            if (!currentStudent) return;
+
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            // Check if task is assigned to this student
+            if (task.assignedTo[0] !== 'all' && !task.assignedTo.includes(currentStudent.name)) {
+                showMessage('This task is not assigned to you!', 'error');
+                return;
+            }
+
+            // Check if already completed
+            if (task.completedBy.some(completion => completion.studentName === currentStudent.name)) {
+                showMessage('You have already completed this task!', 'error');
+                return;
+            }
+
+            // Add to completed by
+            task.completedBy.push({
+                studentName: currentStudent.name,
+                selectedOption: null,
+                completedAt: new Date().toISOString()
+            });
+            
+            // Update student points
+            currentStudent.taskPoints += task.points;
+            currentStudent.completedTasks.push(taskId);
+            
+            // Check if all assigned students have completed the task
+            if (task.assignedTo[0] === 'all') {
+                task.isCompleted = task.completedBy.length === students.length;
+            } else {
+                const allAssignedCompleted = task.assignedTo.every(studentName => 
+                    task.completedBy.some(completion => completion.studentName === studentName)
+                );
+                task.isCompleted = allAssignedCompleted;
+            }
+
+            // Update points display with animation
+            const pointsElement = document.getElementById('studentTotalPoints');
+            pointsElement.textContent = currentStudent.taskPoints;
+            pointsElement.classList.add('points-added');
+            setTimeout(() => pointsElement.classList.remove('points-added'), 500);
+
+            loadMyTasks();
+            loadStudentTable();
+            loadTopStudents();
+            updateStudentStats();
+            updateTaskStats();
+            showMessage(`Task completed! You earned ${task.points} points!`, 'success');
+        }
+
+        // Delete task
+        function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                const taskIndex = tasks.findIndex(t => t.id === taskId);
+                if (taskIndex !== -1) {
+                    const task = tasks[taskIndex];
+                    
+                    // Remove from students' completed tasks and deduct points
+                    task.completedBy.forEach(completion => {
+                        const student = students.find(s => s.name === completion.studentName);
+                        if (student) {
+                            // Remove task points
+                            student.taskPoints = Math.max(0, student.taskPoints - task.points);
+                            // Remove from completed tasks
+                            student.completedTasks = student.completedTasks.filter(id => id !== taskId);
+                            // Remove from task options completed
+                            if (student.taskOptionsCompleted[taskId]) {
+                                delete student.taskOptionsCompleted[taskId];
+                            }
+                        }
+                    });
+                    
+                    // Remove task
+                    tasks.splice(taskIndex, 1);
+                    
+                    loadTasks();
+                    loadStudentsTable();
+                    updateTaskStats();
+                    updateAdminStats();
+                    if (currentUser.role === 'student') {
+                        loadMyTasks();
+                        updateStudentStats();
+                    }
+                    showMessage('Task deleted successfully!', 'success');
+                }
             }
         }
 
@@ -1396,105 +2361,18 @@
         document.getElementById('deductStudentSelect').addEventListener('change', function() {
             const student = students.find(s => s.name === this.value);
             if (student) {
-                document.getElementById('currentMarks').value = student.marks;
+                document.getElementById('currentMarks').value = student.baseMarks + student.taskPoints;
             }
         });
 
-        // Search functionality for admin
-        function searchStudents() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const tableBody = document.getElementById('studentsTableBody');
-            
-            if (!searchTerm) {
-                loadStudentsTable();
-                return;
-            }
-            
-            const filteredStudents = students.filter(s => 
-                s.name.toLowerCase().includes(searchTerm)
-            ).sort((a, b) => b.marks - a.marks);
-            
-            tableBody.innerHTML = filteredStudents.map((student, index) => {
-                const status = getStatus(student.marks);
-                return `
-                    <tr>
-                        <td class="student-name-cell">
-                            <i class="fas fa-user"></i> ${student.name}
-                        </td>
-                        <td class="marks-cell">${student.marks}/100</td>
-                        <td class="status-cell">
-                            <span class="status-badge ${status.class}">${status.text}</span>
-                        </td>
-                        <td class="rank-cell">${index + 1}</td>
-                        <td class="action-cell">
-                            <button class="edit-btn" onclick="editStudent('${student.name}')">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="delete-btn" onclick="deleteStudent('${student.name}')">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // Search functionality for student
-        function searchStudentsStudent() {
-            const searchTerm = document.getElementById('studentSearchInput').value.toLowerCase();
-            const tableBody = document.getElementById('studentStudentsTableBody');
-            
-            if (!searchTerm) {
-                loadStudentView();
-                return;
-            }
-            
-            const filteredStudents = students.filter(s => 
-                s.name.toLowerCase().includes(searchTerm)
-            ).sort((a, b) => b.marks - a.marks);
-            
-            tableBody.innerHTML = filteredStudents.map((student, index) => {
-                const status = getStatus(student.marks);
-                return `
-                    <tr>
-                        <td class="student-name-cell">
-                            <i class="fas fa-user"></i> ${student.name}
-                        </td>
-                        <td class="marks-cell">${student.marks}/100</td>
-                        <td class="status-cell">
-                            <span class="status-badge ${status.class}">${status.text}</span>
-                        </td>
-                        <td class="rank-cell">${index + 1}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // Clear search
-        function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            loadStudentsTable();
-        }
-
-        function clearSearchStudent() {
-            document.getElementById('studentSearchInput').value = '';
-            loadStudentView();
-        }
-
-        // Refresh data
-        function refreshData() {
-            updateAllDashboards();
-            showMessage('Data refreshed!', 'success');
-        }
-
-        // Update all dashboards
-        function updateAllDashboards() {
-            updateStats();
-            updateStudentStats();
-            loadStudentsTable();
-            loadStudentView();
-            loadTopStudents();
-            populateStudentSelects();
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
         }
 
         // Show message
@@ -1511,31 +2389,31 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            // Auto-login for testing (remove in production)
-            // document.getElementById('username').value = 'admin';
-            // document.getElementById('password').value = 'admin123';
-            
             // Set focus to username
             document.getElementById('username').focus();
             
-            // Enter key support
+            // Enter key support for login
             document.getElementById('password').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     login();
                 }
             });
+            
+            // Populate student selects
+            populateStudentSelects();
         });
 
-        // Auto-save simulation
-        function simulateAutoSave() {
+        // Auto-refresh data every 30 seconds
+        setInterval(() => {
             if (currentUser) {
-                console.log('Auto-saving data...');
-                // In real app, here you would save to localStorage or server
+                if (currentUser.role === 'admin') {
+                    updateAdminStats();
+                    updateTaskStats();
+                } else {
+                    updateStudentStats();
+                }
             }
-        }
-
-        // Auto-save every 30 seconds
-        setInterval(simulateAutoSave, 30000);
+        }, 30000);
     </script>
 </body>
 </html>
